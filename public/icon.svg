@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="pitchGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#022c22" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#pitchGrad)"/>
+  <circle cx="256" cy="256" r="180" stroke="white" stroke-width="8" stroke-opacity="0.25"/>
+  <circle cx="256" cy="256" r="60" stroke="white" stroke-width="8" stroke-opacity="0.3"/>
+  <line x1="76" y1="256" x2="436" y2="256" stroke="white" stroke-width="8" stroke-opacity="0.25"/>
+  <!-- Football icon silhouette -->
+  <g transform="translate(156, 156) scale(0.39)">
+    <circle cx="256" cy="256" r="230" fill="#090d16" stroke="#ffffff" stroke-width="16"/>
+    <!-- Pentagons -->
+    <polygon points="256,120 326,170 299,250 213,250 186,170" fill="url(#goldGrad)" stroke="#ffffff" stroke-width="10"/>
+    <polygon points="120,290 186,260 213,340 160,390 100,360" fill="#ffffff" stroke="#090d16" stroke-width="8"/>
+    <polygon points="392,290 326,260 299,340 352,390 412,360" fill="#ffffff" stroke="#090d16" stroke-width="8"/>
+    <polygon points="256,420 200,365 230,460 282,460 312,365" fill="#ffffff" stroke="#090d16" stroke-width="8"/>
+  </g>
+  <!-- Lightning buzz accent -->
+  <path d="M370 120 L320 220 L375 220 L290 390 L320 255 L270 255 Z" fill="#38bdf8" filter="drop-shadow(0 4px 12px rgba(56,189,248,0.6))"/>
+</svg>

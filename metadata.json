@@ -1,0 +1,6 @@
+{
+  "name": "FootBuzz",
+  "description": "Everything Football. One Place. Live scores, fixtures, tactical analytics, historic time machine, and football discovery.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
