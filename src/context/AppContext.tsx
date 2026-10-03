@@ -39,7 +39,7 @@ interface AppContextType {
 
   user: UserProfile | null;
   isLoggedIn: boolean;
-  login: (email: string, name?: string) => void;
+  login: (email: string, name?: string, avatarUrl?: string, provider?: 'email' | 'google') => void;
   logout: () => void;
   updateUserProfile: (updates: Partial<UserProfile>) => void;
   deleteAccount: () => void;
@@ -155,13 +155,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const savedUser = localStorage.getItem('footbuzz_user');
       if (savedUser) {
         try {
-          return JSON.parse(savedUser);
+          const parsed = JSON.parse(savedUser);
+          if (
+            parsed &&
+            parsed.id &&
+            parsed.id !== 'usr-default' &&
+            parsed.email !== 'football.fan@footbuzz.app'
+          ) {
+            return parsed;
+          } else {
+            localStorage.removeItem('footbuzz_user');
+          }
         } catch (e) {
-          return DEFAULT_USER;
+          return null;
         }
       }
     }
-    return DEFAULT_USER;
+    return null; // From first: strictly logged out
   });
 
   const [currentTab, setCurrentTab] = useState<NavTab>('home');
@@ -211,15 +221,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  const login = (email: string, name?: string) => {
+  const login = (
+    email: string,
+    name?: string,
+    avatarUrl?: string,
+    provider: 'email' | 'google' = 'email'
+  ) => {
+    const trimmedEmail = email.trim() || 'fan@footbuzz.app';
+    const cleanName = (name && name.trim()) || trimmedEmail.split('@')[0] || 'Football Fan';
     const newUser: UserProfile = {
       id: `usr-${Date.now()}`,
-      email,
-      name: name || email.split('@')[0],
-      avatarUrl: '',
-      favoriteTeamIds: ['team-mancity', 'team-realmadrid'],
-      favoritePlayerIds: ['player-haaland'],
-      favoriteCompetitionIds: ['comp-pl'],
+      email: trimmedEmail,
+      name: cleanName,
+      avatarUrl: avatarUrl || '',
+      authProvider: provider,
+      favoriteTeamIds: ['team-mancity', 'team-realmadrid', 'team-mohunbagan'],
+      favoritePlayerIds: ['player-haaland', 'player-yamal'],
+      favoriteCompetitionIds: ['comp-isl', 'comp-pl', 'comp-ucl'],
       favoriteMatchIds: [],
       notificationSettings: {
         matchStart: true,
@@ -232,7 +250,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setUser(newUser);
     setAuthModalOpen(false);
-    addToast('Welcome to FootBuzz', `Logged in as ${newUser.name}`, 'SUCCESS');
+    addToast(
+      provider === 'google' ? 'Google Account Connected' : 'Welcome to FootBuzz',
+      `Signed in as ${newUser.name}`,
+      'SUCCESS'
+    );
   };
 
   const logout = () => {

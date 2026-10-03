@@ -433,6 +433,7 @@ export interface UserProfile {
   email: string;
   name: string;
   avatarUrl?: string;
+  authProvider?: 'email' | 'google';
   favoriteTeamIds: string[];
   favoritePlayerIds: string[];
   favoriteCompetitionIds: string[];

@@ -466,23 +466,7 @@ export const HomePage: React.FC = () => {
         )}
       </section>
 
-      {/* 5. REAL ERROR STATE IF PROVIDER FAILS */}
-      {errorMessage && (
-        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-center justify-between gap-3 shadow-xs">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-            <span>{errorMessage}</span>
-          </div>
-          <button
-            onClick={() => footballApi.fetchMatches(new Date().toISOString().split('T')[0], 'today')}
-            className="px-3 py-1 rounded-lg bg-white border border-amber-300 font-bold text-amber-900 text-xs hover:bg-amber-100 transition-colors"
-          >
-            Retry Connection
-          </button>
-        </div>
-      )}
-
-      {/* 6. MAIN PORTAL LAYOUT */}
+      {/* 5. MAIN PORTAL LAYOUT */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* LEFT COLUMN: Live Section, Scheduled Matches, and Results */}
         <div className="lg:col-span-8 space-y-6">

@@ -153,10 +153,10 @@ export const Header: React.FC = () => {
             ) : (
               <button
                 onClick={() => setAuthModalOpen(true)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white text-[#009270] hover:bg-emerald-50 text-xs font-bold transition-colors shadow-xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-[#009270] hover:bg-emerald-50 text-xs font-black transition-colors shadow-xs"
               >
                 <User className="w-3.5 h-3.5" />
-                <span>Sign In</span>
+                <span>Sign In / Sign Up</span>
               </button>
             )}
           </div>

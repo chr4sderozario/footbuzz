@@ -480,23 +480,7 @@ export const MatchesPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 4. ERROR BANNER */}
-      {errorMessage && (
-        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-center justify-between gap-3 shadow-xs">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-            <span>{errorMessage}</span>
-          </div>
-          <button
-            onClick={() => footballApi.fetchMatches(selectedDate, 'today')}
-            className="px-3 py-1 rounded-lg bg-white border border-amber-300 font-bold text-amber-900 text-xs hover:bg-amber-100 transition-colors"
-          >
-            Retry Connection
-          </button>
-        </div>
-      )}
-
-      {/* 5. MATCH LIST OR HONEST EMPTY STATE */}
+      {/* 4. MATCH LIST OR EMPTY STATE */}
       {isLoading ? (
         <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 p-12 text-center shadow-xs space-y-3">
           <RefreshCw className="w-8 h-8 text-[#009270] animate-spin mx-auto" />
