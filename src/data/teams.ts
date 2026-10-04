@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Team } from '../types/football';
+import { Team } from '../types/football.js';
 
 export const TEAMS_DATA: Team[] = [
   // --- PREMIER LEAGUE ---

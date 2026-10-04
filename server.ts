@@ -571,17 +571,37 @@ app.get('/api/search', async (req: Request, res: Response) => {
 
   try {
     const todayStr = new Date().toISOString().split('T')[0];
-    const todayMatches = await fetchRealProviderMatches(todayStr);
+    const providerMatches = await fetchRealProviderMatches(todayStr);
+    const defaultMatches = generateDefaultMatches();
+    console.log('[API/SEARCH DEBUG] defaultMatches length:', defaultMatches ? defaultMatches.length : 'NULL');
+
+    // Pool all match sources (deduplicated by id)
+    const matchMap = new Map<string, Match>();
+    for (const m of defaultMatches) {
+      matchMap.set(m.id, m);
+    }
+    for (const m of providerMatches) {
+      matchMap.set(m.id, m);
+    }
+    const allMatches = Array.from(matchMap.values());
 
     const tokens = normalized.split(' ').filter(Boolean);
     const matchedMatches: Match[] = [];
     const matchedTeamsMap = new Map<string, any>();
 
-    for (const match of todayMatches) {
-      const homeNorm = normalizeQuery(match.homeTeam.name + ' ' + match.homeTeam.shortName + ' ' + match.homeTeam.code);
-      const awayNorm = normalizeQuery(match.awayTeam.name + ' ' + match.awayTeam.shortName + ' ' + match.awayTeam.code);
-      const compNorm = normalizeQuery(match.competitionName);
-      const fullText = `${homeNorm} ${awayNorm} ${compNorm}`;
+    for (const match of allMatches) {
+      const homeNorm = normalizeQuery(
+        `${match.homeTeam.name} ${match.homeTeam.shortName || ''} ${match.homeTeam.code || ''}`
+      );
+      const awayNorm = normalizeQuery(
+        `${match.awayTeam.name} ${match.awayTeam.shortName || ''} ${match.awayTeam.code || ''}`
+      );
+      const compNorm = normalizeQuery(match.competitionName || '');
+      const venueNorm = normalizeQuery(`${match.venue || ''} ${match.city || ''}`);
+      const coachNorm = normalizeQuery(
+        `${match.lineups?.home?.coach || ''} ${match.lineups?.away?.coach || ''}`
+      );
+      const fullText = `${homeNorm} ${awayNorm} ${compNorm} ${venueNorm} ${coachNorm}`;
 
       const allTokensMatch = tokens.every((tok) => fullText.includes(tok));
       const pairMatch =
@@ -605,7 +625,7 @@ app.get('/api/search', async (req: Request, res: Response) => {
     // Fuzzy suggestion if 0 matches
     let suggestion: string | undefined = undefined;
     if (matchedMatches.length === 0 && matchedTeamsMap.size === 0) {
-      for (const m of todayMatches) {
+      for (const m of allMatches) {
         const d1 = levenshtein(normalized, m.homeTeam.name.toLowerCase());
         const d2 = levenshtein(normalized, m.awayTeam.name.toLowerCase());
         if (d1 <= 3) {

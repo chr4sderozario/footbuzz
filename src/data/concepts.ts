@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FootballConcept } from '../types/football';
+import { FootballConcept } from '../types/football.js';
 
 export const FOOTBALL_CONCEPTS: FootballConcept[] = [
   {

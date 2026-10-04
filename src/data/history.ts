@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HistoricTournament } from '../types/football';
+import { HistoricTournament } from '../types/football.js';
 
 export const HISTORIC_TOURNAMENTS: HistoricTournament[] = [
   {

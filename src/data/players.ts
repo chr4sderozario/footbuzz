@@ -5,7 +5,7 @@
  * Real high-resolution official ESPN headshots & stats for ISL, European, and International stars.
  */
 
-import { Player } from '../types/football';
+import { Player } from '../types/football.js';
 
 export const PLAYERS_DATA: Player[] = [
   // --- ISL STARS ---

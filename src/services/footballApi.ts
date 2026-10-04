@@ -317,14 +317,26 @@ export class FootballDataService {
     }
 
     const tokens = normalized.split(' ').filter(Boolean);
+    const poolMap = new Map<string, Match>();
+
+    for (const m of this.matches) {
+      poolMap.set(m.id, m);
+    }
+    for (const m of generateDefaultMatches()) {
+      poolMap.set(m.id, m);
+    }
+
+    const allMatches = Array.from(poolMap.values());
     const matchedMatches: Match[] = [];
     const matchedTeamsMap = new Map<string, any>();
 
-    for (const match of this.matches) {
-      const homeNorm = (match.homeTeam.name + ' ' + match.homeTeam.shortName + ' ' + match.homeTeam.code).toLowerCase();
-      const awayNorm = (match.awayTeam.name + ' ' + match.awayTeam.shortName + ' ' + match.awayTeam.code).toLowerCase();
-      const compNorm = match.competitionName.toLowerCase();
-      const fullText = `${homeNorm} ${awayNorm} ${compNorm}`;
+    for (const match of allMatches) {
+      const homeNorm = `${match.homeTeam.name} ${match.homeTeam.shortName || ''} ${match.homeTeam.code || ''}`.toLowerCase();
+      const awayNorm = `${match.awayTeam.name} ${match.awayTeam.shortName || ''} ${match.awayTeam.code || ''}`.toLowerCase();
+      const compNorm = (match.competitionName || '').toLowerCase();
+      const venueNorm = `${match.venue || ''} ${match.city || ''}`.toLowerCase();
+      const coachNorm = `${match.lineups?.home?.coach || ''} ${match.lineups?.away?.coach || ''}`.toLowerCase();
+      const fullText = `${homeNorm} ${awayNorm} ${compNorm} ${venueNorm} ${coachNorm}`;
 
       const allTokensPresent = tokens.every((tok) => fullText.includes(tok));
       const isTwoTeamPair =

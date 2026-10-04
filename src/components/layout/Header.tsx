@@ -18,6 +18,8 @@ export const Header: React.FC = () => {
     setAuthModalOpen,
     setIntroModalOpen,
     setSelectedLeagueFilter,
+    globalSearchQuery,
+    setGlobalSearchQuery,
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -106,14 +108,40 @@ export const Header: React.FC = () => {
 
           {/* Primary Actions & User Auth */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Quick Search trigger */}
+            {/* Interactive Search Bar Form (Header) */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                navigateTo('search');
+              }}
+              className="hidden sm:flex items-center gap-1.5 bg-black/20 hover:bg-black/30 focus-within:bg-white focus-within:text-slate-900 border border-white/25 focus-within:border-emerald-400 rounded-xl px-2.5 py-1 transition-all shadow-inner"
+            >
+              <Search className="w-3.5 h-3.5 text-emerald-200 shrink-0" />
+              <input
+                type="text"
+                placeholder="Search matches, history, teams..."
+                value={globalSearchQuery}
+                onChange={(e) => setGlobalSearchQuery(e.target.value)}
+                onFocus={() => {
+                  if (currentTab !== 'search') navigateTo('search');
+                }}
+                className="bg-transparent border-none text-xs text-white placeholder-white/75 focus:text-slate-900 focus:placeholder-slate-400 focus:outline-none w-36 md:w-52 transition-all font-medium"
+              />
+              <button
+                type="submit"
+                className="px-2.5 py-0.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-950 text-emerald-200 border border-emerald-400/40 font-bold text-[11px] transition-colors shrink-0 cursor-pointer"
+              >
+                Search
+              </button>
+            </form>
+
+            {/* Mobile Search Button */}
             <button
               onClick={() => navigateTo('search')}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-black/15 hover:bg-black/25 text-white text-xs font-medium transition-colors"
+              className="sm:hidden flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-black/20 text-white text-xs font-bold"
               title="Global Football Search"
             >
-              <Search className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Search</span>
+              <Search className="w-4 h-4" />
             </button>
 
             {/* Intro & League Guide Trigger */}

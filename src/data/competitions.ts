@@ -6,7 +6,7 @@
  * Bundesliga, Copa América, UEFA Euro, FIFA World Cup, AFC Asian Cup, FA Cup, and Copa Libertadores.
  */
 
-import { Competition } from '../types/football';
+import { Competition } from '../types/football.js';
 
 export const COMPETITIONS_DATA: Competition[] = [
   // 1. INDIAN SUPER LEAGUE (ISL)

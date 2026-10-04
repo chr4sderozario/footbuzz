@@ -76,21 +76,40 @@ export const SearchPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Main Search Input */}
-        <div className="relative">
-          <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            autoFocus
-            placeholder="Search teams or fixture pairs (e.g. Arsenal vs Chelsea, Barcelona, Real Madrid)..."
-            value={globalSearchQuery}
-            onChange={(e) => setGlobalSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-10 py-3.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-hidden focus:border-[#009270] focus:bg-white transition-all shadow-xs font-medium"
-          />
-          {isSearching && (
-            <RefreshCw className="w-4 h-4 text-[#009270] animate-spin absolute right-4 top-1/2 -translate-y-1/2" />
-          )}
-        </div>
+        {/* Main Search Form with explicit Search Button */}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setIsSearching(true);
+            footballApi.searchAsync(globalSearchQuery).then((res) => {
+              setResults(res);
+              setIsSearching(false);
+            });
+          }}
+          className="flex flex-col sm:flex-row gap-2"
+        >
+          <div className="relative flex-1">
+            <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              autoFocus
+              placeholder="Search matches, history, teams, players, managers (e.g. Brazil vs India, Real Madrid, Messi)..."
+              value={globalSearchQuery}
+              onChange={(e) => setGlobalSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-10 py-3.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-hidden focus:border-[#009270] focus:bg-white transition-all shadow-xs font-medium"
+            />
+            {isSearching && (
+              <RefreshCw className="w-4 h-4 text-[#009270] animate-spin absolute right-4 top-1/2 -translate-y-1/2" />
+            )}
+          </div>
+          <button
+            type="submit"
+            className="px-6 py-3.5 rounded-xl bg-[#009270] hover:bg-[#028060] text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer active:scale-98"
+          >
+            <Search className="w-4 h-4" />
+            <span>Search</span>
+          </button>
+        </form>
 
         {/* Popular Quick Suggestions */}
         <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">

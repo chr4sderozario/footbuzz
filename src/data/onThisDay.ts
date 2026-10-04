@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { OnThisDayEvent } from '../types/football';
+import { OnThisDayEvent } from '../types/football.js';
 
 export const ON_THIS_DAY_EVENTS: OnThisDayEvent[] = [
   {
