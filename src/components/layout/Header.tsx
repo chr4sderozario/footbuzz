@@ -66,7 +66,14 @@ export const Header: React.FC = () => {
 
             <button
               onClick={() => navigateTo('home')}
-              className="flex items-center gap-2 group text-left"
+              onDoubleClick={() => {
+                if (typeof window !== 'undefined') {
+                  localStorage.removeItem('footbuzz_video_intro_seen');
+                  window.location.reload();
+                }
+              }}
+              className="flex items-center gap-2 group text-left cursor-pointer"
+              title="Click for Home | Double-click to replay intro video"
             >
               <div className="flex items-center">
                 <span className="text-2xl font-black tracking-tight text-white font-display">

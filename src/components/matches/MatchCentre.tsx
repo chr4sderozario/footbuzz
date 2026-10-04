@@ -371,18 +371,46 @@ export const MatchCentre: React.FC<{ match: Match }> = ({ match }) => {
               </div>
             )}
 
-            {match.score.home !== null && match.score.away !== null ? (
+            {isLive || match.status === 'FINISHED' || match.score.home !== null ? (
               <div className="flex items-center justify-center gap-3">
                 <span className="font-mono text-4xl sm:text-5xl font-black text-slate-900 tabular-nums">
-                  {match.score.home}
+                  {match.score.home !== null && !isNaN(match.score.home) ? match.score.home : 0}
                 </span>
                 <span className="text-slate-300 font-mono text-2xl font-light">–</span>
                 <span className="font-mono text-4xl sm:text-5xl font-black text-slate-900 tabular-nums">
-                  {match.score.away}
+                  {match.score.away !== null && !isNaN(match.score.away) ? match.score.away : 0}
                 </span>
               </div>
             ) : (
               <div className="font-mono text-3xl text-slate-400 font-bold">VS</div>
+            )}
+
+            {/* Goalscorers Live / Finished Panel */}
+            {(isLive || match.status === 'FINISHED') && goalEvents.length > 0 && (
+              <div className="w-full max-w-md mx-auto pt-2 grid grid-cols-2 gap-2 text-[11px] border-t border-slate-100 font-medium">
+                <div className="text-right space-y-0.5 pr-2 border-r border-slate-200">
+                  {goalEvents
+                    .filter((g) => g.isHomeTeam || g.teamId === match.homeTeam.id)
+                    .map((g, idx) => (
+                      <div key={idx} className="flex items-center justify-end gap-1 text-slate-800">
+                        <span className="font-bold">{g.playerName}</span>
+                        <span className="font-mono text-slate-500">{g.minute}'</span>
+                        <span className="text-amber-500 animate-pulse">⚽</span>
+                      </div>
+                    ))}
+                </div>
+                <div className="text-left space-y-0.5 pl-2">
+                  {goalEvents
+                    .filter((g) => !g.isHomeTeam && g.teamId !== match.homeTeam.id)
+                    .map((g, idx) => (
+                      <div key={idx} className="flex items-center justify-start gap-1 text-slate-800">
+                        <span className="text-amber-500 animate-pulse">⚽</span>
+                        <span className="font-mono text-slate-500">{g.minute}'</span>
+                        <span className="font-bold">{g.playerName}</span>
+                      </div>
+                    ))}
+                </div>
+              </div>
             )}
 
             {match.score.penalties && (

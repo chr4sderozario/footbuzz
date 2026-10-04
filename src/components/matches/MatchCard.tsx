@@ -113,8 +113,8 @@ export const MatchCard: React.FC<{
               <ClubCrest name={match.homeTeam.name} code={match.homeTeam.code} crestUrl={match.homeTeam.crestUrl} size="xs" />
               <span className="text-xs font-bold text-slate-800 truncate">{match.homeTeam.shortName}</span>
             </div>
-            <span className="font-mono text-sm font-black text-slate-900 tabular-nums">
-              {homeScore !== null ? homeScore : '—'}
+            <span className={`font-mono text-sm font-black tabular-nums ${isLive ? 'text-rose-600' : 'text-slate-900'}`}>
+              {isLive || isFinished ? (homeScore !== null && !isNaN(homeScore) ? homeScore : 0) : '—'}
             </span>
           </div>
 
@@ -123,11 +123,19 @@ export const MatchCard: React.FC<{
               <ClubCrest name={match.awayTeam.name} code={match.awayTeam.code} crestUrl={match.awayTeam.crestUrl} size="xs" />
               <span className="text-xs font-bold text-slate-800 truncate">{match.awayTeam.shortName}</span>
             </div>
-            <span className="font-mono text-sm font-black text-slate-900 tabular-nums">
-              {awayScore !== null ? awayScore : '—'}
+            <span className={`font-mono text-sm font-black tabular-nums ${isLive ? 'text-rose-600' : 'text-slate-900'}`}>
+              {isLive || isFinished ? (awayScore !== null && !isNaN(awayScore) ? awayScore : 0) : '—'}
             </span>
           </div>
         </div>
+
+        {/* Goalscorers preview on strip */}
+        {(isLive || isFinished) && goalEvents.length > 0 && (
+          <div className="text-[10px] text-slate-500 font-medium truncate pt-1 border-t border-slate-100 flex items-center gap-1">
+            <span className="text-amber-500">⚽</span>
+            <span className="truncate">{goalEvents.map((g) => `${g.playerName} ${g.minute}'`).join(', ')}</span>
+          </div>
+        )}
 
         {/* Footnote */}
         <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-1 text-[11px] font-medium text-blue-600 truncate">
@@ -235,52 +243,74 @@ export const MatchCard: React.FC<{
 
         {/* Teams and Scores */}
         <div className="space-y-2.5 py-1">
-          {/* Home */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <ClubCrest
-                name={match.homeTeam.name}
-                code={match.homeTeam.code}
-                crestUrl={match.homeTeam.crestUrl}
-                size="sm"
-              />
-              <span className="font-bold text-sm text-slate-900 group-hover:text-emerald-700 transition-colors truncate">
-                {match.homeTeam.name}
+          {/* Home Team Row */}
+          <div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <ClubCrest
+                  name={match.homeTeam.name}
+                  code={match.homeTeam.code}
+                  crestUrl={match.homeTeam.crestUrl}
+                  size="sm"
+                />
+                <span className="font-bold text-sm text-slate-900 group-hover:text-emerald-700 transition-colors truncate">
+                  {match.homeTeam.name}
+                </span>
+              </div>
+              <span className={`font-mono text-lg font-black tabular-nums transition-transform duration-300 ${
+                isLive ? 'text-rose-600 scale-105' : 'text-slate-900'
+              }`}>
+                {isLive || isFinished ? (homeScore !== null && !isNaN(homeScore) ? homeScore : 0) : '—'}
               </span>
             </div>
-            <span className="font-mono text-lg font-black text-slate-900 tabular-nums">
-              {homeScore !== null ? homeScore : '—'}
-            </span>
+            {/* Home Goalscorers */}
+            {(isLive || isFinished) && goalEvents.filter((g) => g.isHomeTeam || g.teamId === match.homeTeam.id).length > 0 && (
+              <div className="pl-9 pt-0.5 text-[11px] text-slate-500 font-medium flex items-center gap-1.5 truncate">
+                <span className="text-amber-500 animate-bounce">⚽</span>
+                <span className="truncate">
+                  {goalEvents
+                    .filter((g) => g.isHomeTeam || g.teamId === match.homeTeam.id)
+                    .map((g) => `${g.playerName} ${g.minute}'`)
+                    .join(', ')}
+                </span>
+              </div>
+            )}
           </div>
 
-          {/* Away */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <ClubCrest
-                name={match.awayTeam.name}
-                code={match.awayTeam.code}
-                crestUrl={match.awayTeam.crestUrl}
-                size="sm"
-              />
-              <span className="font-bold text-sm text-slate-900 group-hover:text-emerald-700 transition-colors truncate">
-                {match.awayTeam.name}
+          {/* Away Team Row */}
+          <div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <ClubCrest
+                  name={match.awayTeam.name}
+                  code={match.awayTeam.code}
+                  crestUrl={match.awayTeam.crestUrl}
+                  size="sm"
+                />
+                <span className="font-bold text-sm text-slate-900 group-hover:text-emerald-700 transition-colors truncate">
+                  {match.awayTeam.name}
+                </span>
+              </div>
+              <span className={`font-mono text-lg font-black tabular-nums transition-transform duration-300 ${
+                isLive ? 'text-rose-600 scale-105' : 'text-slate-900'
+              }`}>
+                {isLive || isFinished ? (awayScore !== null && !isNaN(awayScore) ? awayScore : 0) : '—'}
               </span>
             </div>
-            <span className="font-mono text-lg font-black text-slate-900 tabular-nums">
-              {awayScore !== null ? awayScore : '—'}
-            </span>
+            {/* Away Goalscorers */}
+            {(isLive || isFinished) && goalEvents.filter((g) => !g.isHomeTeam && g.teamId !== match.homeTeam.id).length > 0 && (
+              <div className="pl-9 pt-0.5 text-[11px] text-slate-500 font-medium flex items-center gap-1.5 truncate">
+                <span className="text-amber-500 animate-bounce">⚽</span>
+                <span className="truncate">
+                  {goalEvents
+                    .filter((g) => !g.isHomeTeam && g.teamId !== match.homeTeam.id)
+                    .map((g) => `${g.playerName} ${g.minute}'`)
+                    .join(', ')}
+                </span>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Goalscorers if real events present */}
-        {goalEvents.length > 0 && (
-          <div className="text-[11px] text-slate-500 truncate pt-1 border-t border-slate-100 flex items-center gap-1.5">
-            <span>⚽</span>
-            <span className="truncate">
-              {goalEvents.map((g) => `${g.playerName} (${g.minute}')`).join(', ')}
-            </span>
-          </div>
-        )}
 
         {/* Match Headline & Actions: Watch & Tickets (Feature 29) */}
         <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">

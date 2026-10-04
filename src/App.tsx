@@ -12,6 +12,7 @@ import { MobileBottomNav } from './components/layout/MobileBottomNav';
 import { ToastContainer } from './components/common/ToastContainer';
 import { AuthModal } from './components/account/AuthModal';
 import { IntroModal } from './components/common/IntroModal';
+import { IntroVideoOverlay } from './components/common/IntroVideoOverlay';
 import { IntroLoadingScreen } from './components/common/IntroLoadingScreen';
 
 import { HomePage } from './components/home/HomePage';
@@ -83,7 +84,7 @@ export default function App() {
   return (
     <AppProvider>
       <div className="min-h-screen flex flex-col bg-[#f1f3f6] text-slate-900 selection:bg-emerald-500/30 selection:text-emerald-900 transition-colors">
-        <IntroLoadingScreen />
+        <IntroVideoOverlay />
         <Header />
         <LiveScoreTicker />
         <MainContent />

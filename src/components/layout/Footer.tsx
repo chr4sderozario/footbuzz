@@ -23,8 +23,21 @@ export const Footer: React.FC = () => {
             <p className="text-xs text-slate-400 leading-relaxed">
               Everything Football. One Place. The ultimate football command centre for live scores, tactical pitch analytics, and football history.
             </p>
-            <div className="pt-2">
+            <div className="pt-2 flex flex-wrap items-center gap-2">
               <PWAInstallButton />
+              <button
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    localStorage.removeItem('footbuzz_video_intro_seen');
+                    window.location.reload();
+                  }
+                }}
+                className="px-2.5 py-1.5 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                title="Replay FootBuzz Video Intro"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span>Play Intro Video</span>
+              </button>
             </div>
           </div>
 
@@ -58,7 +71,9 @@ export const Footer: React.FC = () => {
             © {new Date().getFullYear()} FootBuzz. Everything Football. One Place.
           </div>
           <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1"><Shield className="w-3.5 h-3.5 text-emerald-400" /> Verified Football Data Provider</span>
+            <span className="flex items-center gap-1">
+              <Shield className="w-3.5 h-3.5 text-emerald-400" /> Verified ESPN Football Data
+            </span>
             <span>·</span>
             <span>Progressive Web App (PWA)</span>
           </div>
