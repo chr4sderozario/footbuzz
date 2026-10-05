@@ -59,7 +59,7 @@ type MatchTab =
   | 'h2h'
   | 'tactics';
 
-export const MatchCentre: React.FC<{ match: Match }> = ({ match }) => {
+const MatchCentreContent: React.FC<{ match: Match }> = ({ match }) => {
   const {
     navigateTo,
     isMatchBookmarked,
@@ -120,17 +120,120 @@ export const MatchCentre: React.FC<{ match: Match }> = ({ match }) => {
     }
   };
 
+  // Helper to extract full boxscore statistics from real provider summary
+  const extractStatisticsFromSummary = (summary: any): any => {
+    const boxTeams = summary?.boxscore?.teams || summary?.statistics?.teams;
+    if (!Array.isArray(boxTeams) || boxTeams.length < 2) return null;
+    const homeBox = boxTeams[0];
+    const awayBox = boxTeams[1];
+    const getStat = (box: any, name: string): number => {
+      const s = (box?.statistics || []).find(
+        (item: any) => item.name === name || item.label?.toLowerCase() === name.toLowerCase()
+      );
+      if (!s) return 0;
+      const num = parseFloat(String(s.displayValue || s.value || '0').replace('%', ''));
+      return isNaN(num) ? 0 : num;
+    };
+    const homePoss = getStat(homeBox, 'possessionPct');
+    const awayPoss = getStat(awayBox, 'possessionPct');
+    return {
+      possession: [homePoss || (awayPoss ? 100 - awayPoss : 50), awayPoss || (homePoss ? 100 - homePoss : 50)],
+      shotsTotal: [getStat(homeBox, 'totalShots') || getStat(homeBox, 'shots'), getStat(awayBox, 'totalShots') || getStat(awayBox, 'shots')],
+      shotsOnTarget: [getStat(homeBox, 'shotsOnTarget'), getStat(awayBox, 'shotsOnTarget')],
+      fouls: [getStat(homeBox, 'foulsCommitted'), getStat(awayBox, 'foulsCommitted')],
+      corners: [getStat(homeBox, 'wonCorners'), getStat(awayBox, 'wonCorners')],
+      yellowCards: [getStat(homeBox, 'yellowCards'), getStat(awayBox, 'yellowCards')],
+      redCards: [getStat(homeBox, 'redCards'), getStat(awayBox, 'redCards')],
+      offsides: [getStat(homeBox, 'offsides'), getStat(awayBox, 'offsides')],
+      saves: [getStat(homeBox, 'saves'), getStat(awayBox, 'saves')],
+    };
+  };
+
+  // Helper to extract events/goals from real provider summary
+  const extractEventsFromSummary = (summary: any): any[] => {
+    const rawDetails = summary?.header?.competitions?.[0]?.details || summary?.details || summary?.keyEvents || summary?.events || [];
+    const events: any[] = [];
+    if (Array.isArray(rawDetails)) {
+      for (const d of rawDetails) {
+        const isGoal = d.type?.text === 'Goal' || d.type?.id === '70' || d.scoringPlay === true;
+        const isCard = d.type?.text?.includes('Card') || d.type?.name?.includes('Card');
+        const isYellow = isCard && (d.type?.text?.includes('Yellow') || d.type?.id === '51');
+        const isRed = isCard && (d.type?.text?.includes('Red') || d.type?.id === '52');
+        const isSub = d.type?.text === 'Substitution' || d.type?.id === '11';
+
+        let type: any = 'GOAL';
+        if (isYellow) type = 'YELLOW_CARD';
+        else if (isRed) type = 'RED_CARD';
+        else if (isSub) type = 'SUBSTITUTION';
+        else if (isGoal) type = 'GOAL';
+        else continue;
+
+        const teamId = String(d.team?.id || '');
+        const athlete = d.athletesInvolved?.[0] || d.athlete || {};
+        const rawClock = d.clock?.displayValue || d.clock?.value || '0';
+        const eventMin = parseInt(String(rawClock).replace("'", ''), 10) || 0;
+
+        events.push({
+          id: `ev-${d.id || eventMin || Math.random()}`,
+          minute: eventMin,
+          type,
+          teamId: `team-${teamId}`,
+          teamName: d.team?.displayName || (teamId.includes(match.homeTeam.id.replace('team-', '')) ? match.homeTeam.name : match.awayTeam.name),
+          playerId: athlete.id ? `p-${athlete.id}` : undefined,
+          playerName: athlete.displayName || athlete.shortName || 'Player',
+          detail: d.text || d.description || d.type?.text,
+          isHomeTeam: teamId.includes(match.homeTeam.id.replace('team-', '')),
+        });
+      }
+    }
+    return events;
+  };
+
+  // Helper to extract confirmed lineups from real provider rosters
+  const extractLineupsFromSummary = (summary: any): any => {
+    const rosters = summary?.rosters;
+    if (!Array.isArray(rosters) || rosters.length < 2) return null;
+    const parseLineup = (roster: any, isHome: boolean) => {
+      const starting = (roster.roster || []).filter((p: any) => p.starter === true);
+      const bench = (roster.roster || []).filter((p: any) => p.starter === false);
+      const coach = roster.coach?.[0]?.displayName || (isHome ? 'Manager' : 'Head Coach');
+      const formatPlayer = (p: any) => ({
+        playerId: `p-${p.athlete?.id || Math.random()}`,
+        name: p.athlete?.displayName || p.athlete?.shortName || 'Player',
+        shirtNumber: parseInt(String(p.jersey || p.athlete?.jersey || '0'), 10) || 1,
+        position: p.position?.abbreviation || p.athlete?.position?.abbreviation || 'MF',
+        gridPosition: { x: 50, y: 50 },
+        isCaptain: p.captain || false,
+      });
+      return {
+        formation: roster.formation || '4-3-3',
+        coach,
+        startingXI: starting.map(formatPlayer),
+        bench: bench.map(formatPlayer),
+      };
+    };
+    return {
+      home: parseLineup(rosters[0], true),
+      away: parseLineup(rosters[1], false),
+    };
+  };
+
+  // Combined Active Verified Match Data
+  const activeStats = match.statistics || (summaryData ? extractStatisticsFromSummary(summaryData) : undefined);
+  const activeEvents = match.events && match.events.length > 0 ? match.events : (summaryData ? extractEventsFromSummary(summaryData) : []);
+  const activeLineups = match.lineups || (summaryData ? extractLineupsFromSummary(summaryData) : undefined);
+
   // Real match events
-  const goalEvents = Array.isArray(match.events)
-    ? match.events.filter((e) => e.type === 'GOAL' || e.type === 'PENALTY_GOAL')
+  const goalEvents = Array.isArray(activeEvents)
+    ? activeEvents.filter((e) => e.type === 'GOAL' || e.type === 'PENALTY_GOAL')
     : [];
 
-  const subEvents = Array.isArray(match.events)
-    ? match.events.filter((e) => e.type === 'SUBSTITUTION')
+  const subEvents = Array.isArray(activeEvents)
+    ? activeEvents.filter((e) => e.type === 'SUBSTITUTION')
     : [];
 
-  const cardEvents = Array.isArray(match.events)
-    ? match.events.filter((e) => e.type === 'YELLOW_CARD' || e.type === 'RED_CARD')
+  const cardEvents = Array.isArray(activeEvents)
+    ? activeEvents.filter((e) => e.type === 'YELLOW_CARD' || e.type === 'RED_CARD')
     : [];
 
   // Moment of the Match (latest decisive goal or card)
@@ -337,6 +440,7 @@ export const MatchCentre: React.FC<{ match: Match }> = ({ match }) => {
             <ClubCrest
               name={match.homeTeam.name}
               code={match.homeTeam.code}
+              country={match.homeTeam.country}
               crestUrl={match.homeTeam.crestUrl}
               size="xl"
             />
@@ -455,6 +559,7 @@ export const MatchCentre: React.FC<{ match: Match }> = ({ match }) => {
             <ClubCrest
               name={match.awayTeam.name}
               code={match.awayTeam.code}
+              country={match.awayTeam.country}
               crestUrl={match.awayTeam.crestUrl}
               size="xl"
             />
@@ -927,9 +1032,9 @@ export const MatchCentre: React.FC<{ match: Match }> = ({ match }) => {
             </div>
           )}
 
-          {match.events && match.events.length > 0 ? (
+          {activeEvents && activeEvents.length > 0 ? (
             <div className="space-y-3">
-              {match.events.map((ev) => {
+              {activeEvents.map((ev) => {
                 const isExpanded = expandedEventId === ev.id;
                 return (
                   <div
@@ -1028,11 +1133,11 @@ export const MatchCentre: React.FC<{ match: Match }> = ({ match }) => {
             </div>
           </div>
 
-          {match.lineups ? (
+          {activeLineups ? (
             lineupViewMode === 'PITCH' ? (
               <FootballPitch
-                homePlayers={match.lineups.home.startingXI}
-                awayPlayers={match.lineups.away.startingXI}
+                homePlayers={activeLineups.home.startingXI}
+                awayPlayers={activeLineups.away.startingXI}
                 homeTeamName={match.homeTeam.name}
                 awayTeamName={match.awayTeam.name}
                 onPlayerClick={(p) => setSelectedPlayerForModal(p)}
@@ -1046,13 +1151,13 @@ export const MatchCentre: React.FC<{ match: Match }> = ({ match }) => {
                       <ClubCrest name={match.homeTeam.name} code={match.homeTeam.code} crestUrl={match.homeTeam.crestUrl} size="sm" />
                       <div>
                         <div className="font-black text-sm text-slate-900">{match.homeTeam.name}</div>
-                        <div className="text-xs text-slate-500 font-mono">Formation: {match.lineups.home.formation} · Coach: {match.lineups.home.coach}</div>
+                        <div className="text-xs text-slate-500 font-mono">Formation: {activeLineups.home.formation} · Coach: {activeLineups.home.coach}</div>
                       </div>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {match.lineups.home.startingXI.map((player) => (
+                    {activeLineups.home.startingXI.map((player: any) => (
                       <PlayerCard
                         key={`h-${player.playerId}`}
                         player={player}
@@ -1065,11 +1170,11 @@ export const MatchCentre: React.FC<{ match: Match }> = ({ match }) => {
                   </div>
 
                   {/* Substitutes */}
-                  {match.lineups.home.bench.length > 0 && (
+                  {activeLineups.home.bench.length > 0 && (
                     <div className="pt-4 border-t border-slate-100 space-y-2">
                       <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Substitutes</div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        {match.lineups.home.bench.map((player) => (
+                        {activeLineups.home.bench.map((player: any) => (
                           <PlayerCard
                             key={`hb-${player.playerId}`}
                             player={player}
@@ -1091,13 +1196,13 @@ export const MatchCentre: React.FC<{ match: Match }> = ({ match }) => {
                       <ClubCrest name={match.awayTeam.name} code={match.awayTeam.code} crestUrl={match.awayTeam.crestUrl} size="sm" />
                       <div>
                         <div className="font-black text-sm text-slate-900">{match.awayTeam.name}</div>
-                        <div className="text-xs text-slate-500 font-mono">Formation: {match.lineups.away.formation} · Coach: {match.lineups.away.coach}</div>
+                        <div className="text-xs text-slate-500 font-mono">Formation: {activeLineups.away.formation} · Coach: {activeLineups.away.coach}</div>
                       </div>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {match.lineups.away.startingXI.map((player) => (
+                    {activeLineups.away.startingXI.map((player: any) => (
                       <PlayerCard
                         key={`a-${player.playerId}`}
                         player={player}
@@ -1110,11 +1215,11 @@ export const MatchCentre: React.FC<{ match: Match }> = ({ match }) => {
                   </div>
 
                   {/* Substitutes */}
-                  {match.lineups.away.bench.length > 0 && (
+                  {activeLineups.away.bench.length > 0 && (
                     <div className="pt-4 border-t border-slate-100 space-y-2">
                       <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Substitutes</div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        {match.lineups.away.bench.map((player) => (
+                        {activeLineups.away.bench.map((player: any) => (
                           <PlayerCard
                             key={`ab-${player.playerId}`}
                             player={player}
@@ -1143,14 +1248,25 @@ export const MatchCentre: React.FC<{ match: Match }> = ({ match }) => {
       {/* ========================================================================= */}
       {activeTab === 'stats' && (
         <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-4">
-          <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider font-display">Match Statistics</h3>
-          {match.statistics ? (
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider font-display">
+              Match Statistics
+            </h3>
+            <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md font-bold">
+              Official Provider Verified
+            </span>
+          </div>
+          {activeStats ? (
             <div className="space-y-3">
-              {statBar('Possession', match.statistics.possession[0], match.statistics.possession[1], true)}
-              {statBar('Shots on Target', match.statistics.shotsOnTarget[0], match.statistics.shotsOnTarget[1])}
-              {statBar('Total Shots', match.statistics.shotsTotal[0], match.statistics.shotsTotal[1])}
-              {statBar('Fouls', match.statistics.fouls[0], match.statistics.fouls[1])}
-              {statBar('Corners', match.statistics.corners[0], match.statistics.corners[1])}
+              {statBar('Possession', activeStats.possession[0], activeStats.possession[1], true)}
+              {statBar('Shots on Target', activeStats.shotsOnTarget[0], activeStats.shotsOnTarget[1])}
+              {statBar('Total Shots', activeStats.shotsTotal[0], activeStats.shotsTotal[1])}
+              {statBar('Corner Kicks', activeStats.corners[0], activeStats.corners[1])}
+              {statBar('Fouls Committed', activeStats.fouls[0], activeStats.fouls[1])}
+              {activeStats.yellowCards && statBar('Yellow Cards', activeStats.yellowCards[0], activeStats.yellowCards[1])}
+              {activeStats.redCards && (activeStats.redCards[0] > 0 || activeStats.redCards[1] > 0) && statBar('Red Cards', activeStats.redCards[0], activeStats.redCards[1])}
+              {activeStats.offsides && statBar('Offsides', activeStats.offsides[0], activeStats.offsides[1])}
+              {activeStats.saves && statBar('Goalkeeper Saves', activeStats.saves[0], activeStats.saves[1])}
             </div>
           ) : (
             <div className="p-8 text-center text-xs text-slate-500">
@@ -1224,4 +1340,141 @@ export const MatchCentre: React.FC<{ match: Match }> = ({ match }) => {
       />
     </div>
   );
+};
+
+export const MatchCentre: React.FC<{ matchId?: string | null; match?: Match }> = ({
+  matchId,
+  match: initialMatch,
+}) => {
+  const { navigateTo } = useApp();
+  const [resolvedMatch, setResolvedMatch] = useState<Match | null>(() => {
+    if (initialMatch) return initialMatch;
+    if (matchId) return footballApi.getMatchById(matchId) || null;
+    return null;
+  });
+  const [isLoading, setIsLoading] = useState<boolean>(() => !resolvedMatch && Boolean(matchId));
+  const [hasAttemptedFetch, setHasAttemptedFetch] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (initialMatch) {
+      setResolvedMatch(initialMatch);
+      setIsLoading(false);
+      return;
+    }
+
+    if (!matchId) {
+      // If no matchId specified, check if there are any cached matches
+      const fallback = footballApi.getAllMatches()[0] || null;
+      setResolvedMatch(fallback);
+      setIsLoading(false);
+      return;
+    }
+
+    const cached = footballApi.getMatchById(matchId);
+    if (cached) {
+      setResolvedMatch(cached);
+      setIsLoading(false);
+      return;
+    }
+
+    // Match not found in local memory, asynchronously fetch the specific match from backend
+    setIsLoading(true);
+    let isMounted = true;
+
+    footballApi
+      .fetchMatchById(matchId)
+      .then((fetched) => {
+        if (isMounted) {
+          if (fetched) {
+            setResolvedMatch(fetched);
+          }
+          setIsLoading(false);
+          setHasAttemptedFetch(true);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load match by ID:', err);
+        if (isMounted) {
+          setIsLoading(false);
+          setHasAttemptedFetch(true);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [matchId, initialMatch]);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 max-w-7xl mx-auto py-6 animate-pulse">
+        {/* Skeleton Top Bar */}
+        <div className="h-6 w-48 bg-slate-200 rounded-md" />
+
+        {/* Skeleton Header Card */}
+        <div className="rounded-3xl bg-white border border-slate-200 p-8 shadow-sm space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="h-5 w-32 bg-slate-200 rounded-full" />
+            <div className="h-5 w-24 bg-slate-200 rounded-full" />
+          </div>
+
+          <div className="grid grid-cols-3 items-center gap-4 py-6">
+            <div className="flex flex-col items-center space-y-3">
+              <div className="w-16 h-16 rounded-full bg-slate-200" />
+              <div className="h-4 w-28 bg-slate-200 rounded" />
+            </div>
+            <div className="flex flex-col items-center space-y-2">
+              <div className="h-8 w-16 bg-slate-200 rounded" />
+              <div className="h-3 w-20 bg-slate-200 rounded" />
+            </div>
+            <div className="flex flex-col items-center space-y-3">
+              <div className="w-16 h-16 rounded-full bg-slate-200" />
+              <div className="h-4 w-28 bg-slate-200 rounded" />
+            </div>
+          </div>
+        </div>
+
+        {/* Skeleton Tabs & Content */}
+        <div className="h-12 bg-white rounded-2xl border border-slate-200" />
+        <div className="h-64 bg-white rounded-2xl border border-slate-200" />
+      </div>
+    );
+  }
+
+  if (!resolvedMatch) {
+    return (
+      <div className="max-w-2xl mx-auto my-12 p-8 bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200 text-center space-y-5 shadow-lg">
+        <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto border border-amber-200 text-2xl font-bold">
+          ⚽
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-xl font-black text-slate-900 font-display">
+            Match Details Not Found
+          </h2>
+          <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
+            {matchId
+              ? `We couldn't locate match #${matchId} in the live provider feed. The match may have ended or the fixture data is currently being updated.`
+              : 'No match was selected. Please choose a match from the fixtures list.'}
+          </p>
+        </div>
+
+        <div className="pt-2 flex flex-wrap justify-center gap-3">
+          <button
+            onClick={() => navigateTo('matches')}
+            className="px-6 py-2.5 rounded-xl bg-[#009270] hover:bg-[#028060] text-white text-xs font-black shadow-md transition-all active:scale-95"
+          >
+            Browse All Matches
+          </button>
+          <button
+            onClick={() => navigateTo('home')}
+            className="px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all"
+          >
+            Back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return <MatchCentreContent match={resolvedMatch} />;
 };

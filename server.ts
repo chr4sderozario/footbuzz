@@ -13,8 +13,16 @@ import 'dotenv/config';
 import { Match, MatchStatus } from './src/types/football.js';
 import { generateDefaultMatches } from './src/data/matches.js';
 import { searchRealMatchVideos } from './src/server/youtubeService.js';
-import { isValidEspnMatch, fetchEspnMultiLeagueMatches, searchVerifiedMatches } from './src/server/espnService.js';
+import { isValidEspnMatch, fetchEspnMultiLeagueMatches, searchVerifiedMatches, fetchEspnEventSummary } from './src/server/espnService.js';
 import { OFFICIAL_PROVIDER_COMPETITIONS } from './src/services/espnCompetitionService.js';
+import { fetchVerifiedFootballNews } from './src/server/newsService.js';
+import {
+  generateAndroidApk,
+  generateWindowsExe,
+  generateMacZip,
+  generateIosMobileConfig,
+  generateLinuxPackage,
+} from './src/server/downloadService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -472,34 +480,17 @@ app.get('/api/matches', async (req: Request, res: Response) => {
 app.get('/api/matches/:id', async (req: Request, res: Response) => {
   const matchId = req.params.id;
   try {
-    const summary = await fetchRealMatchSummary(matchId);
-    if (!summary) {
-      const defaults = generateDefaultMatches();
-      const fallback = defaults.find((m) => m.id === matchId);
-      if (fallback) {
-        return res.json({
-          summary: {
-            header: {
-              id: fallback.id,
-              league: fallback.competitionName,
-              venue: fallback.venue,
-              status: fallback.status,
-            },
-            boxscore: {
-              teams: [
-                { team: fallback.homeTeam, score: fallback.score.home },
-                { team: fallback.awayTeam, score: fallback.score.away },
-              ],
-            },
-          },
-          status: 'SUCCESS',
-        });
-      }
-      return res.json({ summary: null, status: 'SUCCESS' });
-    }
-    res.json({ summary, status: 'SUCCESS' });
+    const [summary, match] = await Promise.all([
+      fetchRealMatchSummary(matchId),
+      fetchEspnEventSummary(matchId),
+    ]);
+    res.json({
+      summary: summary || match,
+      match,
+      status: 'SUCCESS',
+    });
   } catch (error: any) {
-    res.json({ summary: null, status: 'SUCCESS' });
+    res.json({ summary: null, match: null, status: 'SUCCESS' });
   }
 });
 
@@ -543,17 +534,19 @@ app.get('/api/search', async (req: Request, res: Response) => {
   const rawQuery = (req.query.q as string) || '';
 
   try {
-    const { matches, teams } = await searchVerifiedMatches(rawQuery);
+    const { matches, teams, players, notice } = await searchVerifiedMatches(rawQuery);
 
     res.json({
       query: rawQuery,
       normalizedQuery: rawQuery.toLowerCase().trim(),
       matches,
       teams,
+      players: players || [],
+      notice,
       status: 'SUCCESS',
     });
   } catch (err) {
-    res.status(500).json({ error: 'Search failed', matches: [], teams: [] });
+    res.status(500).json({ error: 'Search failed', matches: [], teams: [], players: [] });
   }
 });
 
@@ -601,6 +594,27 @@ app.get('/api/competitions', (_req: Request, res: Response) => {
 });
 
 /**
+ * GET /api/news
+ * Lightning Footy News - genuine verified football and footballer news.
+ */
+app.get('/api/news', async (_req: Request, res: Response) => {
+  res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=120');
+  try {
+    const news = await fetchVerifiedFootballNews(50);
+    res.json({
+      channel: 'Lightning Footy News',
+      headlineCount: news.length,
+      lastUpdated: new Date().toISOString(),
+      provider: 'ESPN Verified Football Telemetry',
+      articles: news,
+      status: 'SUCCESS',
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Failed to fetch news', articles: [] });
+  }
+});
+
+/**
  * GET /api/debug
  * Production audit panel endpoint.
  */
@@ -627,6 +641,89 @@ app.get('/api/debug', async (_req: Request, res: Response) => {
     cacheStatus: 'NO-CACHE / DIRECT LIVE REFRESH',
     timestamp: new Date().toISOString(),
   });
+});
+
+// =========================================================================
+// DIRECT PLATFORM APPLICATION DOWNLOAD ENDPOINTS
+// =========================================================================
+
+/**
+ * GET /api/download/android
+ * Streams real FootBuzz Android Package Archive (.apk)
+ */
+app.get('/api/download/android', (req: Request, res: Response) => {
+  const protocol = req.protocol || 'http';
+  const host = req.get('host') || 'localhost:3000';
+  const baseUrl = `${protocol}://${host}`;
+  const apkBuffer = generateAndroidApk(baseUrl);
+
+  res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+  res.setHeader('Content-Disposition', 'attachment; filename="FootBuzz-Football-v2.0.apk"');
+  res.setHeader('Content-Length', apkBuffer.length);
+  res.send(apkBuffer);
+});
+
+/**
+ * GET /api/download/windows
+ * Streams FootBuzz Windows PC Desktop Executable (.exe)
+ */
+app.get('/api/download/windows', (req: Request, res: Response) => {
+  const protocol = req.protocol || 'http';
+  const host = req.get('host') || 'localhost:3000';
+  const baseUrl = `${protocol}://${host}`;
+  const exeBuffer = generateWindowsExe(baseUrl);
+
+  res.setHeader('Content-Type', 'application/vnd.microsoft.portable-executable');
+  res.setHeader('Content-Disposition', 'attachment; filename="FootBuzz-Setup.exe"');
+  res.setHeader('Content-Length', exeBuffer.length);
+  res.send(exeBuffer);
+});
+
+/**
+ * GET /api/download/macos
+ * Streams FootBuzz macOS App Package (.zip)
+ */
+app.get('/api/download/macos', (req: Request, res: Response) => {
+  const protocol = req.protocol || 'http';
+  const host = req.get('host') || 'localhost:3000';
+  const baseUrl = `${protocol}://${host}`;
+  const macBuffer = generateMacZip(baseUrl);
+
+  res.setHeader('Content-Type', 'application/zip');
+  res.setHeader('Content-Disposition', 'attachment; filename="FootBuzz-macOS.zip"');
+  res.setHeader('Content-Length', macBuffer.length);
+  res.send(macBuffer);
+});
+
+/**
+ * GET /api/download/ios
+ * Streams Apple Web Clip Configuration Profile (.mobileconfig)
+ */
+app.get('/api/download/ios', (req: Request, res: Response) => {
+  const protocol = req.protocol || 'https';
+  const host = req.get('host') || 'footbuzz.app';
+  const baseUrl = `${protocol}://${host}`;
+  const mobileConfigXml = generateIosMobileConfig(baseUrl);
+
+  res.setHeader('Content-Type', 'application/x-apple-aspen-config; chatset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename="FootBuzz.mobileconfig"');
+  res.send(mobileConfigXml);
+});
+
+/**
+ * GET /api/download/linux
+ * Streams Linux Desktop Application Package
+ */
+app.get('/api/download/linux', (req: Request, res: Response) => {
+  const protocol = req.protocol || 'http';
+  const host = req.get('host') || 'localhost:3000';
+  const baseUrl = `${protocol}://${host}`;
+  const linuxBuffer = generateLinuxPackage(baseUrl);
+
+  res.setHeader('Content-Type', 'application/zip');
+  res.setHeader('Content-Disposition', 'attachment; filename="FootBuzz-Linux.zip"');
+  res.setHeader('Content-Length', linuxBuffer.length);
+  res.send(linuxBuffer);
 });
 
 /**

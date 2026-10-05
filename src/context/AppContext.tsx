@@ -15,6 +15,8 @@ export type NavTab =
   | 'discover'
   | 'history'
   | 'search'
+  | 'lightning-news'
+  | 'tournament-countdowns'
   | 'account'
   | 'match-centre'
   | 'team-detail'

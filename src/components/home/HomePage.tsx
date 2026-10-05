@@ -37,6 +37,7 @@ import { Match, Player } from '../../types/football';
 import { PlayerModal } from '../players/PlayerModal';
 import { PWAInstallButton } from '../common/PWAInstallButton';
 import { FootballToolHubModal } from '../tools/FootballToolHubModal';
+import { LightningFootyNewsBanner } from '../news/LightningFootyNewsBanner';
 
 export const HomePage: React.FC = () => {
   const {
@@ -173,6 +174,9 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-16 animate-in fade-in duration-200">
+      {/* 0. LIGHTNING FOOTY NEWS: TOP FOOTBALLER VERIFIED LIVE NEWS BANNER (10-SEC AUTO-POPUP) */}
+      <LightningFootyNewsBanner />
+
       {/* 1. TOP PROMOTED SPOTLIGHT: MARQUEE MATCHES FIRST */}
       <section className="bg-gradient-to-br from-[#009270] via-[#028060] to-[#090d16] text-white rounded-3xl p-5 sm:p-6 shadow-md relative overflow-hidden">
         <div className="absolute right-0 top-0 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none" />
@@ -226,7 +230,10 @@ export const HomePage: React.FC = () => {
                   return (
                     <div
                       key={`spotlight-${m.id}`}
-                      onClick={() => navigateTo('match-centre', { matchId: m.id })}
+                      onClick={() => {
+                        footballApi.cacheMatch(m);
+                        navigateTo('match-centre', { matchId: m.id });
+                      }}
                       className="w-[295px] shrink-0 bg-white/95 backdrop-blur-md text-slate-900 rounded-2xl p-3.5 border border-white/30 shadow-md hover:scale-[1.02] transition-transform cursor-pointer space-y-2 select-none"
                     >
                       <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 pb-1.5 border-b border-slate-100">

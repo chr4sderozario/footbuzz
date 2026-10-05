@@ -21,16 +21,8 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
   const { isInstallable, isInstalled, install } = usePWAInstall();
   const [modalOpen, setModalOpen] = useState(false);
 
-  const handleClick = async () => {
-    if (isInstallable) {
-      try {
-        await install();
-      } catch {
-        setModalOpen(true);
-      }
-    } else {
-      setModalOpen(true);
-    }
+  const handleClick = () => {
+    setModalOpen(true);
   };
 
   if (variant === 'banner') {

@@ -35,6 +35,18 @@ export interface YouTubeVideoInfo {
   videoType?: 'HIGHLIGHTS' | 'PRESS_CONFERENCE' | 'TACTICAL_ANALYSIS' | 'OFFICIAL_MATCH_CONTENT' | 'GOALS' | 'MATCH_PREVIEW';
 }
 
+export interface FootballNewsItem {
+  id: string;
+  headline: string;
+  description: string;
+  published: string;
+  imageUrl?: string;
+  url: string;
+  byline?: string;
+  category?: string;
+  footballer?: string;
+}
+
 export interface InAppNotification {
   id: string;
   type: 'GOAL' | 'RED_CARD' | 'FULL_TIME' | 'LINEUP' | 'KICKOFF_SOON';

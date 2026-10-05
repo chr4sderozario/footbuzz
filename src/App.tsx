@@ -31,6 +31,8 @@ import { AccountPage } from './components/account/AccountPage';
 import { DiscoverPage } from './components/discover/DiscoverPage';
 import { LiveScoreTicker } from './components/common/LiveScoreTicker';
 import { FootBuzzLiveModeModal } from './components/matches/FootBuzzLiveModeModal';
+import { LightningNewsPage } from './components/news/LightningNewsPage';
+import { TournamentCountdownsPage } from './components/competitions/TournamentCountdownsPage';
 
 import { footballApi } from './services/footballApi';
 
@@ -51,12 +53,7 @@ const MainContent: React.FC = () => {
       {currentTab === 'matches' && <MatchesPage />}
       {currentTab === 'discover' && <DiscoverPage />}
       {currentTab === 'match-centre' && (
-        <MatchCentre
-          match={
-            footballApi.getMatchById(selectedMatchId || 'match-live-mci-ars') ||
-            footballApi.getAllMatches()[0]
-          }
-        />
+        <MatchCentre matchId={selectedMatchId} />
       )}
       {currentTab === 'competitions' && <CompetitionsPage />}
       {currentTab === 'competition-detail' && (
@@ -75,6 +72,8 @@ const MainContent: React.FC = () => {
         <ConceptDetailPage conceptId={selectedConceptId || 'concept-433'} />
       )}
       {currentTab === 'search' && <SearchPage />}
+      {currentTab === 'lightning-news' && <LightningNewsPage />}
+      {currentTab === 'tournament-countdowns' && <TournamentCountdownsPage />}
       {currentTab === 'account' && <AccountPage />}
     </main>
   );

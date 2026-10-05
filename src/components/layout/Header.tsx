@@ -28,6 +28,7 @@ export const Header: React.FC = () => {
   const mainNavItems: { id: NavTab; label: string }[] = [
     { id: 'home', label: 'Home' },
     { id: 'matches', label: 'Live Scores & Fixtures' },
+    { id: 'lightning-news', label: '⚡ Lightning News' },
     { id: 'discover', label: 'Discover' },
     { id: 'competitions', label: 'Competitions' },
     { id: 'teams', label: 'Teams' },
@@ -36,6 +37,8 @@ export const Header: React.FC = () => {
   ];
 
   const subNavQuickFilters = [
+    { label: '⚡ Lightning News', tab: 'lightning-news' as NavTab },
+    { label: '⏳ Tournament Countdowns', tab: 'tournament-countdowns' as NavTab },
     { label: '🇮🇳 ISL 2026/27', compId: 'comp-isl' },
     { label: '🌎 Copa América', compId: 'comp-copa-america' },
     { label: '🇪🇺 UEFA Euro', compId: 'comp-euro' },

@@ -149,7 +149,10 @@ export const MatchesPage: React.FC = () => {
     return (
       <tr
         key={`row-${match.id}`}
-        onClick={() => navigateTo('match-centre', { matchId: match.id })}
+        onClick={() => {
+          footballApi.cacheMatch(match);
+          navigateTo('match-centre', { matchId: match.id });
+        }}
         className="border-b border-slate-100 hover:bg-slate-50/80 transition-colors cursor-pointer group text-xs text-slate-800"
       >
         {/* Time / Minute */}

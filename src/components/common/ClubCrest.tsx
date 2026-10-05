@@ -1,14 +1,19 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
+ * Verified Team Identity & Crest Renderer
+ * Distinctly separates National Team Flags from Real Club Crests.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Shield, Trophy, Globe } from 'lucide-react';
+import { isNationalTeam, getCountryFlag } from '../../utils/flagUtils';
 
 interface ClubCrestProps {
   code?: string;
   name: string;
+  country?: string;
+  isNational?: boolean;
   primaryColor?: string;
   secondaryColor?: string;
   crestUrl?: string;
@@ -19,13 +24,15 @@ interface ClubCrestProps {
 export const ClubCrest: React.FC<ClubCrestProps> = ({
   code,
   name,
+  country,
+  isNational,
   primaryColor = '#1e293b',
   secondaryColor = '#3b82f6',
   crestUrl,
   size = 'md',
   className = '',
 }) => {
-  const [imgError, setImgError] = React.useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const sizeMap = {
     xs: 'w-5 h-5 text-[9px]',
@@ -35,8 +42,39 @@ export const ClubCrest: React.FC<ClubCrestProps> = ({
     xl: 'w-20 h-20 text-lg',
   };
 
-  const codeLabel = (code || name.substring(0, 3)).toUpperCase().slice(0, 3);
+  const isNationalEntity = isNationalTeam(name, country, isNational);
+  const countryFlag = isNationalEntity ? getCountryFlag(name) || getCountryFlag(country || '') : null;
 
+  // 1. NATIONAL TEAM: Display official country flag
+  if (isNationalEntity && countryFlag) {
+    if (!imgError) {
+      return (
+        <div
+          className={`relative inline-flex items-center justify-center shrink-0 rounded-full overflow-hidden border border-slate-200/80 shadow-xs bg-slate-50 ${sizeMap[size]} ${className}`}
+          title={`${name} National Team`}
+        >
+          <img
+            src={countryFlag.flagUrl}
+            alt={`${name} Flag`}
+            onError={() => setImgError(true)}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div
+        className={`relative inline-flex items-center justify-center shrink-0 rounded-full bg-slate-100 border border-slate-200 shadow-xs select-none ${sizeMap[size]} ${className}`}
+        title={`${name} National Team`}
+      >
+        <span className="text-sm">{countryFlag.emoji}</span>
+      </div>
+    );
+  }
+
+  // 2. CLUB: Real club crest from provider (Never use national flag for clubs)
   if (crestUrl && !imgError) {
     return (
       <div className={`relative inline-flex items-center justify-center shrink-0 overflow-hidden ${sizeMap[size]} ${className}`}>
@@ -51,7 +89,8 @@ export const ClubCrest: React.FC<ClubCrestProps> = ({
     );
   }
 
-  // SVG shield shapes with team initials and neutral styling
+  // 3. Fallback: Neutral clean club crest with initials
+  const codeLabel = (code || name.substring(0, 3)).toUpperCase().slice(0, 3);
   return (
     <div
       className={`relative inline-flex items-center justify-center shrink-0 rounded-full font-bold shadow-xs select-none ${sizeMap[size]} ${className}`}
@@ -73,20 +112,38 @@ export const ClubCrest: React.FC<ClubCrestProps> = ({
 export const CompetitionBadge: React.FC<{
   code?: string;
   name: string;
+  country?: string;
   category?: 'league' | 'cup' | 'international' | string;
   primaryColor?: string;
+  emblemUrl?: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
-}> = ({ code, name, category = 'league', primaryColor = '#3d195b', size = 'md', className = '' }) => {
+}> = ({ code, name, country, category = 'league', primaryColor = '#009270', emblemUrl, size = 'md', className = '' }) => {
+  const [imgError, setImgError] = useState(false);
+
   const sizeMap = {
     sm: 'w-6 h-6 text-[9px]',
     md: 'w-8 h-8 text-[11px]',
     lg: 'w-12 h-12 text-sm',
   };
 
+  if (emblemUrl && !imgError) {
+    return (
+      <div className={`relative inline-flex items-center justify-center shrink-0 overflow-hidden ${sizeMap[size]} ${className}`}>
+        <img
+          src={emblemUrl}
+          alt={name}
+          onError={() => setImgError(true)}
+          className="w-full h-full object-contain"
+          loading="lazy"
+        />
+      </div>
+    );
+  }
+
   return (
     <div
-      className={`relative inline-flex items-center justify-center rounded-lg shadow-sm font-bold shrink-0 ${sizeMap[size]} ${className}`}
+      className={`relative inline-flex items-center justify-center rounded-lg shadow-xs font-bold shrink-0 ${sizeMap[size]} ${className}`}
       style={{
         backgroundColor: primaryColor,
         border: '1px solid rgba(255,255,255,0.2)',
@@ -99,7 +156,7 @@ export const CompetitionBadge: React.FC<{
       ) : category === 'international' ? (
         <Globe className="w-3.5 h-3.5 text-sky-300" />
       ) : (
-        <Shield className="w-3.5 h-3.5 text-emerald-300" />
+        <Shield className="w-3.5 h-3.5 text-white/90" />
       )}
     </div>
   );

@@ -8,13 +8,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const rawQuery = (req.query.q as string) || '';
 
   try {
-    const { matches, teams } = await searchVerifiedMatches(rawQuery);
+    const { matches, teams, players, notice } = await searchVerifiedMatches(rawQuery);
 
     res.status(200).json({
       query: rawQuery,
       normalizedQuery: rawQuery.toLowerCase().trim(),
       matches,
       teams,
+      players: players || [],
+      notice,
       provider: 'ESPN Official Scoreboard API',
       status: 'SUCCESS',
     });
@@ -24,6 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       normalizedQuery: rawQuery.toLowerCase().trim(),
       matches: [],
       teams: [],
+      players: [],
       status: 'SUCCESS',
     });
   }

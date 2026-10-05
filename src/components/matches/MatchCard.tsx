@@ -13,6 +13,7 @@ import { TicketModal } from '../common/TicketModal';
 import { MatchShareModal } from './MatchShareModal';
 import { useApp } from '../../context/AppContext';
 import { getMatchMood, getMatchCountdown } from '../../utils/footballUtils';
+import { footballApi } from '../../services/footballApi';
 
 export const MatchCard: React.FC<{
   match: Match;
@@ -85,7 +86,10 @@ export const MatchCard: React.FC<{
   if (variant === 'strip') {
     return (
       <div
-        onClick={() => navigateTo('match-centre', { matchId: match.id })}
+        onClick={() => {
+          footballApi.cacheMatch(match);
+          navigateTo('match-centre', { matchId: match.id });
+        }}
         className="w-[280px] shrink-0 bg-white/95 backdrop-blur-md rounded-xl border border-slate-200/90 p-3.5 shadow-xs hover:shadow-md hover:border-emerald-500 transition-all cursor-pointer flex flex-col justify-between select-none"
       >
         <div className="flex items-center justify-between text-[11px] text-slate-500 pb-2 border-b border-slate-100">
@@ -110,7 +114,7 @@ export const MatchCard: React.FC<{
         <div className="py-2.5 space-y-1.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 min-w-0">
-              <ClubCrest name={match.homeTeam.name} code={match.homeTeam.code} crestUrl={match.homeTeam.crestUrl} size="xs" />
+              <ClubCrest name={match.homeTeam.name} code={match.homeTeam.code} country={match.homeTeam.country} crestUrl={match.homeTeam.crestUrl} size="xs" />
               <span className="text-xs font-bold text-slate-800 truncate">{match.homeTeam.shortName}</span>
             </div>
             <span className={`font-mono text-sm font-black tabular-nums ${isLive ? 'text-rose-600' : 'text-slate-900'}`}>
@@ -120,7 +124,7 @@ export const MatchCard: React.FC<{
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 min-w-0">
-              <ClubCrest name={match.awayTeam.name} code={match.awayTeam.code} crestUrl={match.awayTeam.crestUrl} size="xs" />
+              <ClubCrest name={match.awayTeam.name} code={match.awayTeam.code} country={match.awayTeam.country} crestUrl={match.awayTeam.crestUrl} size="xs" />
               <span className="text-xs font-bold text-slate-800 truncate">{match.awayTeam.shortName}</span>
             </div>
             <span className={`font-mono text-sm font-black tabular-nums ${isLive ? 'text-rose-600' : 'text-slate-900'}`}>
@@ -152,7 +156,10 @@ export const MatchCard: React.FC<{
   return (
     <>
       <div
-        onClick={() => navigateTo('match-centre', { matchId: match.id })}
+        onClick={() => {
+          footballApi.cacheMatch(match);
+          navigateTo('match-centre', { matchId: match.id });
+        }}
         className="group bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 hover:border-emerald-500 p-4 sm:p-5 shadow-xs hover:shadow-md transition-all cursor-pointer select-none space-y-3"
       >
         {/* Top Header */}
@@ -250,6 +257,7 @@ export const MatchCard: React.FC<{
                 <ClubCrest
                   name={match.homeTeam.name}
                   code={match.homeTeam.code}
+                  country={match.homeTeam.country}
                   crestUrl={match.homeTeam.crestUrl}
                   size="sm"
                 />
@@ -284,6 +292,7 @@ export const MatchCard: React.FC<{
                 <ClubCrest
                   name={match.awayTeam.name}
                   code={match.awayTeam.code}
+                  country={match.awayTeam.country}
                   crestUrl={match.awayTeam.crestUrl}
                   size="sm"
                 />

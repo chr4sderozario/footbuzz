@@ -38,7 +38,10 @@ export const LiveScoreTicker: React.FC = () => {
           {liveMatches.map((m) => (
             <button
               key={`ticker-${m.id}`}
-              onClick={() => navigateTo('match-centre', { matchId: m.id })}
+              onClick={() => {
+                footballApi.cacheMatch(m);
+                navigateTo('match-centre', { matchId: m.id });
+              }}
               className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors shrink-0 group text-left"
             >
               <span className="font-bold text-white text-xs">

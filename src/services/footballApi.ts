@@ -21,11 +21,13 @@ export interface SearchResults {
   teams: Team[];
   players: Player[];
   competitions: Competition[];
+  notice?: string;
   error?: string;
 }
 
 export class FootballDataService {
   private matches: Match[] = [];
+  private matchCache: Map<string, Match> = new Map();
   private teams: Team[] = [...TEAMS_DATA];
   private players: Player[] = [...PLAYERS_DATA];
   private competitions: Competition[] = [...COMPETITIONS_DATA];
@@ -105,19 +107,31 @@ export class FootballDataService {
           const data = await res.json();
           if (Array.isArray(data.matches)) {
             this.matches = data.matches.filter(isValidEspnMatch);
+            for (const m of this.matches) {
+              this.matchCache.set(m.id, m);
+            }
             this.lastUpdated = data.lastUpdated || new Date().toISOString();
           } else {
             const espnLive = await fetchEspnProviderMatches(targetDate);
             this.matches = espnLive.filter(isValidEspnMatch);
+            for (const m of this.matches) {
+              this.matchCache.set(m.id, m);
+            }
           }
         } else {
           // Direct ESPN provider call if static SPA rewrite returns HTML
           const espnLive = await fetchEspnProviderMatches(targetDate);
           this.matches = espnLive.filter(isValidEspnMatch);
+          for (const m of this.matches) {
+            this.matchCache.set(m.id, m);
+          }
         }
       } else {
         const espnLive = await fetchEspnProviderMatches(targetDate);
         this.matches = espnLive.filter(isValidEspnMatch);
+        for (const m of this.matches) {
+          this.matchCache.set(m.id, m);
+        }
       }
       this.errorMessage = null;
     } catch (err: any) {
@@ -125,6 +139,9 @@ export class FootballDataService {
       try {
         const espnLive = await fetchEspnProviderMatches(targetDate);
         this.matches = espnLive.filter(isValidEspnMatch);
+        for (const m of this.matches) {
+          this.matchCache.set(m.id, m);
+        }
       } catch (fallbackErr) {
         this.matches = [];
       }
@@ -159,7 +176,61 @@ export class FootballDataService {
   }
 
   public getMatchById(id: string): Match | undefined {
-    return this.matches.find((m) => m.id === id);
+    if (!id) return undefined;
+    const cleanId = id.replace(/^(espn-|fd-)/, '');
+    return (
+      this.matchCache.get(id) ||
+      this.matchCache.get(`espn-${cleanId}`) ||
+      this.matchCache.get(cleanId) ||
+      this.matches.find(
+        (m) =>
+          m.id === id ||
+          m.id === `espn-${cleanId}` ||
+          m.id === cleanId ||
+          m.providerMatchId === id ||
+          m.providerMatchId === cleanId ||
+          (m.providerMatchId && m.providerMatchId.replace(/^(espn-|fd-)/, '') === cleanId)
+      )
+    );
+  }
+
+  public cacheMatch(match: Match): void {
+    if (match && match.id) {
+      this.matchCache.set(match.id, match);
+      const cleanId = match.id.replace(/^(espn-|fd-)/, '');
+      this.matchCache.set(cleanId, match);
+      this.matchCache.set(`espn-${cleanId}`, match);
+      if (match.providerMatchId) {
+        this.matchCache.set(match.providerMatchId, match);
+        const cleanProv = match.providerMatchId.replace(/^(espn-|fd-)/, '');
+        this.matchCache.set(cleanProv, match);
+      }
+    }
+  }
+
+  public async fetchMatchById(id: string): Promise<Match | null> {
+    const existing = this.getMatchById(id);
+    if (existing && existing.statistics && existing.events && existing.events.length > 0) {
+      return existing;
+    }
+
+    try {
+      const cleanId = id.replace(/^(espn-|fd-)/, '');
+      const res = await fetch(`/api/matches/${encodeURIComponent(cleanId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.match) {
+          this.cacheMatch(data.match);
+          return data.match;
+        }
+        if (existing) {
+          return existing;
+        }
+      }
+    } catch (e) {
+      console.error('Error fetching match by ID:', e);
+    }
+    return existing || null;
   }
 
   public getHistoricalMatches(): Match[] {
@@ -230,7 +301,10 @@ export class FootballDataService {
       const res = await fetch(`/api/matches/${encodeURIComponent(matchId)}`);
       if (res.ok) {
         const data = await res.json();
-        return data.summary;
+        if (data.match) {
+          this.matchCache.set(data.match.id, data.match);
+        }
+        return data.summary || data.match;
       }
     } catch (e) {
       console.error('Failed to fetch real match summary:', e);
@@ -318,14 +392,19 @@ export class FootballDataService {
         const contentType = res.headers.get('content-type') || '';
         if (contentType.includes('application/json')) {
           const data = await res.json();
+          const matches = data.matches || [];
+          for (const m of matches) {
+            this.matchCache.set(m.id, m);
+          }
           return {
             query: data.query,
             normalizedQuery: data.normalizedQuery,
             suggestion: data.suggestion,
-            matches: data.matches || [],
+            matches,
             teams: data.teams || [],
-            players: [],
-            competitions: [],
+            players: data.players || [],
+            competitions: data.competitions || [],
+            notice: data.notice,
           };
         }
       }
@@ -333,14 +412,18 @@ export class FootballDataService {
       console.error('Search error:', err);
     }
 
-    const { matches, teams } = await searchVerifiedMatches(rawQuery);
+    const { matches, teams, players, notice } = await searchVerifiedMatches(rawQuery);
+    for (const m of matches) {
+      this.matchCache.set(m.id, m);
+    }
     return {
       query: rawQuery,
       normalizedQuery: query.toLowerCase().trim(),
       matches,
       teams,
-      players: [],
+      players: players || [],
       competitions: [],
+      notice,
     };
   }
 

@@ -124,6 +124,45 @@ export const DiscoverPage: React.FC = () => {
         </div>
       </div>
 
+      {/* ⏳ Tournament Countdowns & World Cup 2026 Radar */}
+      <div
+        onClick={() => navigateTo('tournament-countdowns')}
+        className="bg-gradient-to-r from-slate-900 via-[#041a13] to-slate-950 border border-emerald-500/40 rounded-3xl p-6 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:border-emerald-400 transition-all shadow-md group"
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center text-3xl font-black shrink-0 shadow-lg group-hover:scale-105 transition-transform">
+            ⏳
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                Verified Global Radar
+              </span>
+              <span className="text-xs font-bold text-amber-300">
+                World Cup 2026 · UCL · ISL · 20+ Tournaments
+              </span>
+            </div>
+            <h2 className="text-lg sm:text-xl font-black font-display text-white">
+              How Far Are We to World Cup 2026, UCL & Indian Super League?
+            </h2>
+            <p className="text-xs text-slate-300 max-w-xl">
+              Check real, verified per-second countdown clocks, confirmed host venues, and calendar dates for 20+ major world tournaments.
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            navigateTo('tournament-countdowns');
+          }}
+          className="self-start sm:self-auto px-5 py-2.5 rounded-xl bg-[#009270] hover:bg-[#028060] text-white text-xs font-black shrink-0 transition-colors shadow-sm flex items-center gap-1.5"
+        >
+          <span>View All 20+ Countdowns</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
+
       {/* 1. 🔥 Big Matches */}
       <section className="space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-slate-200">
