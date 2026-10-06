@@ -3,6 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <script>
+      // Gracefully suppress Vite dev WebSocket / HMR messages per environment guidelines
+      (function() {
+        const _origConsoleError = console.error;
+        const _origConsoleWarn = console.warn;
+        console.error = function(...args) {
+          if (args.some(a => typeof a === 'string' && (a.includes('[vite]') || a.includes('WebSocket') || a.includes('ws://') || a.includes('wss://')))) {
+            return;
+          }
+          _origConsoleError.apply(console, args);
+        };
+        console.warn = function(...args) {
+          if (args.some(a => typeof a === 'string' && (a.includes('[vite]') || a.includes('WebSocket')))) {
+            return;
+          }
+          _origConsoleWarn.apply(console, args);
+        };
+        window.addEventListener('error', function(e) {
+          if (e.message && (e.message.includes('[vite]') || e.message.includes('WebSocket'))) {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+          }
+        }, true);
+        window.addEventListener('unhandledrejection', function(e) {
+          if (e.reason && String(e.reason).includes('WebSocket')) {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+          }
+        }, true);
+      })();
+    </script>
     <title>FootBuzz — Everything Football. One Place. Live Football Scores & Schedule</title>
     <meta name="description" content="FootBuzz is the premier football command centre for live scores, fixtures, ISL, Premier League, Champions League, La Liga, International Friendlies, tactical pitch analysis, and football history." />
     

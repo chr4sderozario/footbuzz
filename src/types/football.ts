@@ -15,6 +15,28 @@ export type MatchStatus =
   | 'PEN'
   | 'UPCOMING';
 
+export type FootballGender = 'MEN' | 'WOMEN' | 'MIXED' | 'UNKNOWN';
+export type GlobalGenderFilter = 'ALL' | 'MEN' | 'WOMEN';
+
+export type NormalizedMatchStatus =
+  | 'SCHEDULED'
+  | 'LIVE'
+  | 'HALF_TIME'
+  | 'EXTRA_TIME'
+  | 'FINISHED'
+  | 'POSTPONED'
+  | 'CANCELLED';
+
+export interface MatchLiveClock {
+  displayTime: string; // e.g. "67:24", "45:00", "HALF TIME", "FULL TIME"
+  minute: number;
+  second: number;
+  period: number; // 1 = 1st half, 2 = 2nd half, 3 = extra time 1st, 4 = extra time 2nd
+  running: boolean;
+  stoppageMinutes?: number;
+  serverTimestamp: number; // epoch ms when clock was measured
+}
+
 export type MatchMoodType =
   | 'DERBY'
   | 'FINAL'
@@ -230,6 +252,10 @@ export interface Match {
   competitionName: string;
   competitionCategory: 'league' | 'cup' | 'international' | string;
   competitionEmblem?: string;
+  gender?: FootballGender; // 'MEN' | 'WOMEN' | 'MIXED' | 'UNKNOWN'
+  statusNormalized?: NormalizedMatchStatus;
+  kickoffTimestamp?: number; // epoch milliseconds of scheduled kickoff
+  liveClock?: MatchLiveClock;
   season: string;
   round?: string;
   date: string; // YYYY-MM-DD
@@ -278,6 +304,7 @@ export interface Team {
   code: string;
   country: string;
   countryCode: string;
+  gender?: FootballGender;
   city: string;
   founded: number;
   stadium: string;
@@ -311,6 +338,7 @@ export interface Player {
   name: string;
   shortName: string;
   number: number;
+  gender?: FootballGender;
   position: 'GK' | 'DF' | 'MF' | 'FW' | string;
   detailedPosition?: string;
   nationality: string;

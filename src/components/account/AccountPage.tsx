@@ -14,10 +14,13 @@ import {
   Save,
   Check,
   Smartphone,
+  Crown,
+  Sparkles,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { footballApi } from '../../services/footballApi';
 import { ClubCrest } from '../common/ClubCrest';
+import { SubscriptionPlansModal } from '../common/SubscriptionPlansModal';
 
 export const AccountPage: React.FC = () => {
   const {
@@ -32,6 +35,7 @@ export const AccountPage: React.FC = () => {
   } = useApp();
 
   const [name, setName] = useState(user?.name || '');
+  const [subModalOpen, setSubModalOpen] = useState(false);
   const [notifSettings, setNotifSettings] = useState(
     user?.notificationSettings || {
       matchStart: true,
@@ -97,6 +101,35 @@ export const AccountPage: React.FC = () => {
             <span>Continue with Google Account</span>
           </button>
         </div>
+
+        {/* Subscriptions Teaser Card for Guest */}
+        <div className="pt-3 border-t border-slate-100 max-w-xs mx-auto">
+          <button
+            onClick={() => setSubModalOpen(true)}
+            className="w-full p-3 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 hover:border-amber-300 text-left transition-all group flex items-center justify-between cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-bold shadow-xs">
+                <Crown className="w-4 h-4 fill-current" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-black text-slate-900">FootBuzz Subscriptions</span>
+                  <span className="text-[9px] font-mono font-black uppercase px-1.5 py-0.2 rounded-full bg-slate-900 text-amber-300">
+                    Soon
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-600 font-medium">
+                  Plus · Pro · Max perks & priority waitlist
+                </p>
+              </div>
+            </div>
+            <Sparkles className="w-4 h-4 text-amber-500 shrink-0 group-hover:scale-110 transition-transform" />
+          </button>
+        </div>
+
+        {/* Subscription Plans Modal */}
+        <SubscriptionPlansModal isOpen={subModalOpen} onClose={() => setSubModalOpen(false)} />
       </div>
     );
   }
@@ -304,6 +337,34 @@ export const AccountPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Subscriptions Teaser Card for Logged In User */}
+      <div className="rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-emerald-500/10 border border-amber-300/60 p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold">
+              <Crown className="w-4 h-4 fill-current" />
+            </div>
+            <h3 className="text-sm font-black text-slate-900 font-display">
+              FootBuzz Subscriptions · Plus · Pro · Max
+            </h3>
+            <span className="text-[10px] font-mono font-black uppercase px-2 py-0.5 rounded-full bg-slate-900 text-amber-300">
+              Coming Soon
+            </span>
+          </div>
+          <p className="text-xs text-slate-600 max-w-xl">
+            Upgrade your football universe with ad-free live updates, deep xG radar, 30-year Head-to-Head archives, and unlimited FootAI intelligence.
+          </p>
+        </div>
+
+        <button
+          onClick={() => setSubModalOpen(true)}
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs transition-all shadow-xs shrink-0 cursor-pointer"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>View Plans Teaser</span>
+        </button>
+      </div>
+
       {/* Danger Zone: Account Deletion */}
       <div className="rounded-2xl bg-rose-50 border border-rose-200 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
@@ -325,6 +386,9 @@ export const AccountPage: React.FC = () => {
           Delete Account
         </button>
       </div>
+
+      {/* Subscription Plans Modal */}
+      <SubscriptionPlansModal isOpen={subModalOpen} onClose={() => setSubModalOpen(false)} />
     </div>
   );
 };

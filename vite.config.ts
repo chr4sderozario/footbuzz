@@ -1,11 +1,15 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { defineConfig, Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
-import { fetchRealProviderMatches, fetchRealMatchSummary, normalizeQuery } from './src/server/apiHandler';
-import { searchRealMatchVideos } from './src/server/youtubeService';
-import { generateDefaultMatches } from './src/data/matches';
+import { fetchRealProviderMatches, fetchRealMatchSummary, normalizeQuery } from './src/server/apiHandler.js';
+import { searchRealMatchVideos } from './src/server/youtubeService.js';
+import { generateDefaultMatches } from './src/data/matches.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function safeViteServerShimPlugin(): Plugin {
   return {
@@ -327,7 +331,6 @@ export default defineConfig(() => {
       port: 3000,
       host: '0.0.0.0',
       hmr: false,
-      watch: null,
     },
   };
 });

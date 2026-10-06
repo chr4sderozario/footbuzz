@@ -188,7 +188,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [selectedLeagueFilter, setSelectedLeagueFilter] = useState<string>('all');
-  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const hasUser = localStorage.getItem('footbuzz_user');
+      const isGuest = localStorage.getItem('footbuzz_guest');
+      return !hasUser && !isGuest;
+    }
+    return false;
+  });
   const [introModalOpen, setIntroModalOpen] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const seen = localStorage.getItem('footbuzz_intro_seen');
@@ -251,6 +258,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       },
       joinedDate: new Date().toISOString().split('T')[0],
     };
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('footbuzz_user', JSON.stringify(newUser));
+      localStorage.removeItem('footbuzz_guest');
+    }
     setUser(newUser);
     setAuthModalOpen(false);
     addToast(
@@ -261,6 +272,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const logout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('footbuzz_user');
+    }
     setUser(null);
     addToast('Signed Out', 'You have been logged out of FootBuzz.', 'INFO');
   };

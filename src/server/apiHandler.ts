@@ -5,7 +5,7 @@
  * Authoritative provider pipeline querying live sports data with zero fake matches.
  */
 
-import { Match, MatchStatus } from '../types/football';
+import { Match, MatchStatus } from '../types/football.js';
 
 // In-memory cache for live matches (20-second TTL)
 const cache = new Map<string, { data: any; timestamp: number }>();
