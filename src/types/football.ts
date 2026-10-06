@@ -220,6 +220,7 @@ export interface MatchTeamRef {
   crestSecondaryColor?: string;
   crestUrl?: string;
   country: string;
+  isNational?: boolean;
 }
 
 export interface Match {

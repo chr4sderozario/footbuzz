@@ -33,6 +33,7 @@ import { LiveScoreTicker } from './components/common/LiveScoreTicker';
 import { FootBuzzLiveModeModal } from './components/matches/FootBuzzLiveModeModal';
 import { LightningNewsPage } from './components/news/LightningNewsPage';
 import { TournamentCountdownsPage } from './components/competitions/TournamentCountdownsPage';
+import { WomensFootballPage } from './components/womens/WomensFootballPage';
 
 import { footballApi } from './services/footballApi';
 
@@ -74,6 +75,7 @@ const MainContent: React.FC = () => {
       {currentTab === 'search' && <SearchPage />}
       {currentTab === 'lightning-news' && <LightningNewsPage />}
       {currentTab === 'tournament-countdowns' && <TournamentCountdownsPage />}
+      {currentTab === 'womens-football' && <WomensFootballPage />}
       {currentTab === 'account' && <AccountPage />}
     </main>
   );

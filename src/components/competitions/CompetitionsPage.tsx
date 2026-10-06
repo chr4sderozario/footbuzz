@@ -104,42 +104,83 @@ export const CompetitionsPage: React.FC = () => {
       </div>
 
       {/* Tournament Countdowns & World Cup 2026 Radar Option Banner */}
-      <div
-        onClick={() => navigateTo('tournament-countdowns')}
-        className="bg-gradient-to-r from-slate-950 via-[#06241a] to-slate-900 border border-emerald-500/40 rounded-2xl p-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:border-emerald-400 transition-all shadow-md group"
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center text-2xl font-black shrink-0 shadow-md group-hover:scale-105 transition-transform">
-            ⏳
-          </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                Verified Radar
-              </span>
-              <span className="text-xs font-bold text-amber-300">
-                World Cup 2026 · UCL Final · ISL · 20+ Tournaments
-              </span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div
+          onClick={() => navigateTo('tournament-countdowns')}
+          className="bg-gradient-to-r from-slate-950 via-[#06241a] to-slate-900 border border-emerald-500/40 rounded-2xl p-5 text-white flex flex-col justify-between gap-4 cursor-pointer hover:border-emerald-400 transition-all shadow-md group"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center text-2xl font-black shrink-0 shadow-md group-hover:scale-105 transition-transform">
+              ⏳
             </div>
-            <h2 className="text-base sm:text-lg font-black font-display text-white">
-              Global Tournament Countdowns & World Cup Radar
-            </h2>
-            <p className="text-xs text-slate-300">
-              See exact dates, years, and real ticking countdowns to the next World Cup, Champions League, Indian Super League, and 20 other premier tournaments.
-            </p>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  Verified Radar
+                </span>
+                <span className="text-xs font-bold text-amber-300">
+                  World Cup 2026 · UCL · ISL · 20+ Tournaments
+                </span>
+              </div>
+              <h2 className="text-base sm:text-lg font-black font-display text-white">
+                Global Tournament Countdowns
+              </h2>
+              <p className="text-xs text-slate-300">
+                See exact dates, years, and real ticking countdowns to the next World Cup, Champions League, Indian Super League, and 20+ popular tournaments.
+              </p>
+            </div>
           </div>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigateTo('tournament-countdowns');
+            }}
+            className="self-start px-4 py-2 rounded-xl bg-[#009270] hover:bg-[#028060] text-white text-xs font-black transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>Open Countdown Radar</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            navigateTo('tournament-countdowns');
-          }}
-          className="self-start sm:self-auto px-5 py-2.5 rounded-xl bg-[#009270] hover:bg-[#028060] text-white text-xs font-black shrink-0 transition-colors shadow-sm flex items-center gap-1.5"
+        {/* Women's Football Command Hub Banner */}
+        <div
+          onClick={() => navigateTo('womens-football')}
+          className="bg-gradient-to-r from-slate-950 via-purple-950/60 to-slate-900 border border-purple-500/40 rounded-2xl p-5 text-white flex flex-col justify-between gap-4 cursor-pointer hover:border-purple-400 transition-all shadow-md group"
         >
-          <span>Open Countdown Radar</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-purple-500 text-white flex items-center justify-center text-2xl font-black shrink-0 shadow-md group-hover:scale-105 transition-transform">
+              👩
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                  Dedicated Hub
+                </span>
+                <span className="text-xs font-bold text-purple-200">
+                  WSL · NWSL · UWCL · Liga F · IWL
+                </span>
+              </div>
+              <h2 className="text-base sm:text-lg font-black font-display text-white">
+                Women's Football Global Hub
+              </h2>
+              <p className="text-xs text-slate-300">
+                Scores, live match trackers, Barclays WSL standings, Indian Women's League, and superstar player profiles.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigateTo('womens-football');
+            }}
+            className="self-start px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-black transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>Explore Women's Football</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Grid of Competitions */}

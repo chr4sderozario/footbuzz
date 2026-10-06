@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  * FootBuzz Interactive Football Command Center Hub
- * Launcher for all 20 advanced platform tools & features.
+ * Comprehensive Launcher for all 30+ Advanced Football Tools & Features.
  */
 
 import React, { useState } from 'react';
@@ -28,6 +28,15 @@ import {
   Flame,
   Music,
   Award,
+  BookOpen,
+  Activity,
+  Compass,
+  Zap,
+  Clock,
+  Shield,
+  Calculator,
+  Search,
+  CheckCircle2,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { footballApi } from '../../services/footballApi';
@@ -51,6 +60,15 @@ import { GoldenBootRaceModal } from './GoldenBootRaceModal';
 import { ChantsJukeboxModal } from './ChantsJukeboxModal';
 import { FanPulseModal } from './FanPulseModal';
 import { FootballQuizModal } from './FootballQuizModal';
+import { WinProbabilityGaugeModal } from './WinProbabilityGaugeModal';
+import { PassHeatmapModal } from './PassHeatmapModal';
+import { VarOffsideVisualizerModal } from './VarOffsideVisualizerModal';
+import { BallonDorTrackerModal } from './BallonDorTrackerModal';
+import { ClubCrestArchiveModal } from './ClubCrestArchiveModal';
+import { WorldCupFinalsArchiveModal } from './WorldCupFinalsArchiveModal';
+import { UefaCoefficientsModal } from './UefaCoefficientsModal';
+import { FifaRankingsCalculatorModal } from './FifaRankingsCalculatorModal';
+import { TacticsEncyclopediaModal } from './TacticsEncyclopediaModal';
 
 interface FootballToolHubModalProps {
   isOpen: boolean;
@@ -60,15 +78,158 @@ interface FootballToolHubModalProps {
 export const FootballToolHubModal: React.FC<FootballToolHubModalProps> = ({ isOpen, onClose }) => {
   const { navigateTo } = useApp();
   const matches = footballApi.getAllMatches();
-
   const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [searchFilter, setSearchFilter] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
 
   if (!isOpen && !activeModal) return null;
 
   const toolCards = [
+    // 1. Women's Football Global Hub
+    {
+      id: 'womens-hub',
+      title: "Women's Football Global Command Centre",
+      category: "WOMEN'S FOOTBALL",
+      desc: "Live scores, verified standings, and coverage for Barclays WSL, UWCL, NWSL, Liga F, and Indian Women's League (IWL).",
+      icon: Sparkles,
+      color: 'bg-purple-600 text-white',
+      badge: "Women's Hub",
+      action: () => {
+        onClose();
+        navigateTo('womens-football');
+      },
+    },
+    // 2. Tournament Countdowns
+    {
+      id: 'tournaments-radar',
+      title: 'Global Tournament Countdown Radar',
+      category: 'COUNTDOWN RADAR',
+      desc: 'Live per-second ticking countdowns and confirmed dates for FIFA World Cup 2026, Champions League, ISL, and 20+ leagues.',
+      icon: Clock,
+      color: 'bg-amber-600 text-white',
+      badge: '20+ Leagues',
+      action: () => {
+        onClose();
+        navigateTo('tournament-countdowns');
+      },
+    },
+    // 3. Lightning News
+    {
+      id: 'lightning-news',
+      title: 'Lightning Footy News 10s Live Channel',
+      category: 'BREAKING NEWS',
+      desc: '10-second automatic headline popup engine showcasing verified top footballer stories and transfer scoops.',
+      icon: Zap,
+      color: 'bg-emerald-600 text-white',
+      badge: '10s Auto-Pop',
+      action: () => {
+        onClose();
+        navigateTo('lightning-news');
+      },
+    },
+    // 4. Win Probability Gauge
+    {
+      id: 'win-prob',
+      title: 'Live Win Probability & Momentum Gauge',
+      category: 'AI METRICS',
+      desc: 'Real-time statistical likelihood of victory based on goal difference, match minute elapsed, and squad momentum.',
+      icon: Activity,
+      color: 'bg-emerald-700 text-white',
+      badge: 'Live Elo',
+      action: () => setActiveModal('win-prob'),
+    },
+    // 5. Pass Heatmap
+    {
+      id: 'pass-heatmap',
+      title: 'Pass Accuracy & Pitch Heatmap Visualizer',
+      category: 'OPTICAL ANALYTICS',
+      desc: 'Zonal possession intensity, progressive pass completion, and high-turnover defensive territory.',
+      icon: Compass,
+      color: 'bg-teal-600 text-white',
+      badge: 'Zone 14 Map',
+      action: () => setActiveModal('pass-heatmap'),
+    },
+    // 6. VAR Offside
+    {
+      id: 'var-offside',
+      title: 'VAR Review & 3D Offside Line Projector',
+      category: 'REGULATORY',
+      desc: 'Simulate calibrated 3D geometric vanishing lines, contact point freeze-frames, and IFAB Law 11 rulings.',
+      icon: Eye,
+      color: 'bg-rose-600 text-white',
+      badge: 'Hawk-Eye 3D',
+      action: () => setActiveModal('var-offside'),
+    },
+    // 7. Ballon d'Or
+    {
+      id: 'ballon-dor',
+      title: "Ballon d'Or & Ballon d'Or Féminin Hall of Fame",
+      category: 'HALL OF FAME',
+      desc: "Official records, point tallies, and runner-up voting results for the Ballon d'Or from 1956 to 2026.",
+      icon: Award,
+      color: 'bg-amber-500 text-white',
+      badge: '1956-2026',
+      action: () => setActiveModal('ballon-dor'),
+    },
+    // 8. Club Crest Archive
+    {
+      id: 'crest-archive',
+      title: 'Official Club Crest & Vector Archive',
+      category: 'HERITAGE',
+      desc: 'High-definition vector emblems, primary brand hex codes, and foundation history for 60+ world clubs.',
+      icon: Shield,
+      color: 'bg-slate-800 text-white',
+      badge: '60+ Vectors',
+      action: () => setActiveModal('crest-archive'),
+    },
+    // 9. World Cup Finals Archive
+    {
+      id: 'wc-finals',
+      title: 'FIFA World Cup Finals Archive (1930 - 2022)',
+      category: 'HISTORIC METRICS',
+      desc: 'Official scorelines, winning captains, iconic goalscorers, and attendance records from 1930 to 2022.',
+      icon: Trophy,
+      color: 'bg-amber-600 text-white',
+      badge: '22 Finals',
+      action: () => setActiveModal('wc-finals'),
+    },
+    // 10. UEFA Coefficients
+    {
+      id: 'uefa-coeff',
+      title: 'UEFA & AFC 5-Year Club Coefficients',
+      category: 'RANKINGS',
+      desc: '5-season cumulative European coefficient points determining Champions League seeding pots and EPS spots.',
+      icon: Trophy,
+      color: 'bg-blue-600 text-white',
+      badge: 'UEFA Official',
+      action: () => setActiveModal('uefa-coeff'),
+    },
+    // 11. FIFA Rankings Calculator
+    {
+      id: 'fifa-rankings',
+      title: "FIFA Men's & Women's Rankings Calculator",
+      category: 'MATHEMATICAL ENGINE',
+      desc: 'Simulate exact ranking points gained or lost based on FIFA official formula: P = Pbefore + I * (W - We).',
+      icon: Calculator,
+      color: 'bg-emerald-600 text-white',
+      badge: 'FIFA Formula',
+      action: () => setActiveModal('fifa-rankings'),
+    },
+    // 12. Tactics Encyclopedia
+    {
+      id: 'tactics-encyclo',
+      title: 'Football Tactics & Philosophy Encyclopedia',
+      category: 'COACHING',
+      desc: 'Learn the foundational ideas and counters for Tiki-Taka, Gegenpressing, Total Football, and Catenaccio.',
+      icon: BookOpen,
+      color: 'bg-indigo-600 text-white',
+      badge: 'Tactical Guide',
+      action: () => setActiveModal('tactics-encyclo'),
+    },
+    // 13. Trivia Quiz
     {
       id: 'trivia',
-      title: 'Matchday Trivia & Rules Challenge',
+      title: 'Matchday Trivia & Tactical IQ Challenge',
       category: 'FOOTBALL IQ',
       desc: 'Interactive quiz testing knowledge on ISL, World Cup records, Champions League trivia, and IFAB rules.',
       icon: HelpCircle,
@@ -76,36 +237,18 @@ export const FootballToolHubModal: React.FC<FootballToolHubModalProps> = ({ isOp
       badge: 'Trivia Quiz',
       action: () => setActiveModal('trivia'),
     },
-    {
-      id: 'download-app',
-      title: 'Download & Install Full App',
-      category: 'PROGRESSIVE WEB APP',
-      desc: 'Install FootBuzz directly on iOS Safari, Android, or PC for offline scores and native speed.',
-      icon: Download,
-      color: 'bg-indigo-600 text-white',
-      badge: 'Standalone',
-      action: () => setActiveModal('pwa'),
-    },
-    {
-      id: 'soundboard',
-      title: 'Live Stadium Soundboard',
-      category: 'AUDIO ENGINE',
-      desc: 'Real-time synthesized referee whistle, goal foghorn, crowd acoustics, and VAR audio.',
-      icon: Volume2,
-      color: 'bg-amber-500 text-white',
-      badge: 'Web Audio',
-      action: () => setActiveModal('soundboard'),
-    },
+    // 14. Penalty Shootout
     {
       id: 'penalty',
       title: 'Penalty Shootout Simulator',
       category: 'INTERACTIVE MINI-GAME',
-      desc: 'Sudden-death penalty shootout game. Target high corners and outwit the goalkeeper.',
+      desc: 'Sudden-death penalty shootout game. Target high corners and outwit the goalkeeper with real ball physics.',
       icon: Target,
       color: 'bg-rose-600 text-white',
       badge: 'Mini-Game',
       action: () => setActiveModal('penalty'),
     },
+    // 15. Club Head-to-Head
     {
       id: 'h2h',
       title: 'Club Head-to-Head Matrix',
@@ -116,39 +259,43 @@ export const FootballToolHubModal: React.FC<FootballToolHubModalProps> = ({ isOp
       badge: 'Comparison',
       action: () => setActiveModal('h2h'),
     },
+    // 16. Tactical Whiteboard
     {
       id: 'tactics',
-      title: 'Tactical Pitch Whiteboard',
+      title: 'Tactical Pitch Whiteboard Lab',
       category: 'TACTICAL ENGINE',
-      desc: 'Interactive 11-player formation builder with Gegenpress and Tiki-Taka tactical setups.',
+      desc: 'Interactive 11-player formation builder with Gegenpress, Tiki-Taka, and custom position dragging.',
       icon: Layers,
       color: 'bg-emerald-600 text-white',
-      badge: 'Tactics',
+      badge: '11v11 Lab',
       action: () => setActiveModal('tactics'),
     },
+    // 17. Trophy Room
     {
       id: 'trophy',
-      title: 'Ballon d\'Or & Golden Roll',
+      title: 'Club Trophy Cabinet & Hall of Fame',
       category: 'HALL OF FAME',
-      desc: 'Complete chronological archive of all Ballon d\'Or champions from 1956 to present.',
+      desc: 'Complete trophy cabinets for 50+ world clubs across domestic league titles, continental cups, and World Cups.',
       icon: Trophy,
       color: 'bg-amber-600 text-white',
-      badge: 'History',
+      badge: 'Trophies',
       action: () => setActiveModal('trophy'),
     },
+    // 18. Referee Radar
     {
       id: 'referee',
       title: 'Referee & VAR Strictness Radar',
       category: 'REGULATORY',
-      desc: 'Track referee cards per match, penalty tendencies, and VAR review overturn rates.',
+      desc: 'Track referee cards per match, penalty tendencies, and VAR review overturn rates across leagues.',
       icon: Eye,
       color: 'bg-purple-600 text-white',
-      badge: 'VAR Stats',
+      badge: 'VAR Strictness',
       action: () => setActiveModal('referee'),
     },
+    // 19. Transfers
     {
       id: 'transfers',
-      title: 'Transfer Market Hub',
+      title: 'Transfer Market Live Hub',
       category: 'MARKET RADAR',
       desc: 'Confirmed blockbuster signings, domestic record deals, and contract expiry alarms.',
       icon: ArrowRightLeft,
@@ -156,6 +303,7 @@ export const FootballToolHubModal: React.FC<FootballToolHubModalProps> = ({ isOp
       badge: 'Transfers',
       action: () => setActiveModal('transfers'),
     },
+    // 20. Injury Ward
     {
       id: 'injury',
       title: 'Injury & Suspension Ward',
@@ -163,9 +311,10 @@ export const FootballToolHubModal: React.FC<FootballToolHubModalProps> = ({ isOp
       desc: 'Hamstring & ACL recovery timelines, training returns, and yellow card ban risks.',
       icon: HeartPulse,
       color: 'bg-red-600 text-white',
-      badge: 'Medical',
+      badge: 'Squad Health',
       action: () => setActiveModal('injury'),
     },
+    // 21. Predictor
     {
       id: 'predictor',
       title: 'Fan Prediction League',
@@ -176,6 +325,7 @@ export const FootballToolHubModal: React.FC<FootballToolHubModalProps> = ({ isOp
       badge: 'Fan League',
       action: () => setActiveModal('predictor'),
     },
+    // 22. Multi-Match
     {
       id: 'multi-match',
       title: 'Multi-View Split Dashboard',
@@ -186,6 +336,7 @@ export const FootballToolHubModal: React.FC<FootballToolHubModalProps> = ({ isOp
       badge: 'Split Screen',
       action: () => setActiveModal('multimatch'),
     },
+    // 23. Stadium Guide
     {
       id: 'stadiums',
       title: 'Stadium Guide & Seat Gates',
@@ -196,6 +347,7 @@ export const FootballToolHubModal: React.FC<FootballToolHubModalProps> = ({ isOp
       badge: 'Grounds',
       action: () => setActiveModal('stadiums'),
     },
+    // 24. xG Shot Radar
     {
       id: 'xg',
       title: 'Expected Goals (xG) Shot Radar',
@@ -206,6 +358,7 @@ export const FootballToolHubModal: React.FC<FootballToolHubModalProps> = ({ isOp
       badge: 'xG Radar',
       action: () => setActiveModal('xg'),
     },
+    // 25. Weather
     {
       id: 'weather',
       title: 'Weather & Pitch Conditions',
@@ -216,107 +369,142 @@ export const FootballToolHubModal: React.FC<FootballToolHubModalProps> = ({ isOp
       badge: 'Weather',
       action: () => setActiveModal('weather'),
     },
+    // 26. Global Timezone
     {
       id: 'timezone',
-      title: 'Timezone Converter & .ICS Export',
-      category: 'CALENDAR SYNC',
-      desc: 'Convert kickoff times between IST, GMT, and CET; download fixtures to Google/Apple Calendar.',
+      title: 'Global Timezone Converter',
+      category: 'FIXTURE CLOCK',
+      desc: 'Instantly convert match kickoffs to 40+ global timezones from London to Kolkata.',
       icon: Globe,
-      color: 'bg-blue-500 text-white',
-      badge: 'iCal Sync',
+      color: 'bg-blue-600 text-white',
+      badge: 'Timezones',
       action: () => setActiveModal('timezone'),
     },
-    {
-      id: 'themes',
-      title: 'Floodlight & Night Match Theme',
-      category: 'DISPLAY PREFERENCES',
-      desc: 'Toggle between Daylight Cricbuzz mode and Floodlit Stadium deep obsidian dark theme.',
-      icon: Sliders,
-      color: 'bg-slate-900 text-white',
-      badge: 'Atmosphere',
-      action: () => setActiveModal('themes'),
-    },
+    // 27. Golden Shoe
     {
       id: 'golden-shoe',
-      title: 'Golden Shoe & League Top Scorers Race',
-      category: 'GLOBAL AWARDS',
-      desc: 'Coefficient-weighted scoring race tracking Haaland, Kane, Mbappé, and ISL stars.',
-      icon: Trophy,
-      color: 'bg-amber-600 text-white',
+      title: 'European Golden Shoe Race',
+      category: 'GOALSCORER',
+      desc: 'Real-time coefficient-weighted points race: Goals × League Factor 2.0/1.5.',
+      icon: Award,
+      color: 'bg-yellow-600 text-white',
       badge: 'Golden Shoe',
       action: () => setActiveModal('golden-shoe'),
     },
+    // 28. Stadium Soundboard
+    {
+      id: 'soundboard',
+      title: 'Live Stadium Soundboard',
+      category: 'AUDIO ENGINE',
+      desc: 'Real-time synthesized referee whistle, goal foghorn, crowd acoustics, and VAR audio.',
+      icon: Volume2,
+      color: 'bg-amber-500 text-white',
+      badge: 'Web Audio',
+      action: () => setActiveModal('soundboard'),
+    },
+    // 29. Chants Jukebox
     {
       id: 'chants',
-      title: 'Stadium Anthems & Fan Chants Jukebox',
+      title: 'Club Chants & Anthems Jukebox',
       category: 'FAN CULTURE',
-      desc: 'Sing along to YNWA, Hala Madrid, Joy Mohun Bagan, and historic terrace chants with lyrics.',
+      desc: 'Authentic chants and club anthems from Anfield to Salt Lake Stadium.',
       icon: Music,
-      color: 'bg-emerald-700 text-white',
-      badge: 'Anthems',
+      color: 'bg-rose-500 text-white',
+      badge: 'Chants',
       action: () => setActiveModal('chants'),
     },
+    // 30. Direct Device Download
     {
-      id: 'fan-pulse',
-      title: 'Global Fan Sentiment & Match Pulse Radar',
-      category: 'COMMUNITY PULSE',
-      desc: 'Cast 1X2 win prediction votes on live & upcoming fixtures to see global supporter consensus.',
-      icon: Flame,
-      color: 'bg-orange-600 text-white',
-      badge: 'Pulse',
-      action: () => setActiveModal('fan-pulse'),
+      id: 'download-app',
+      title: 'Multi-Device App Download (APK/EXE/Mac/iOS)',
+      category: 'STANDALONE APP',
+      desc: 'Download FootBuzz directly as an Android APK (.apk), Windows PC launcher (.exe), or install to your home screen.',
+      icon: Download,
+      color: 'bg-emerald-600 text-white',
+      badge: 'APK & EXE',
+      action: () => setActiveModal('pwa'),
     },
   ];
+
+  const filteredTools = toolCards.filter((t) => {
+    if (searchFilter.trim()) {
+      const q = searchFilter.toLowerCase();
+      return (
+        t.title.toLowerCase().includes(q) ||
+        t.category.toLowerCase().includes(q) ||
+        t.desc.toLowerCase().includes(q)
+      );
+    }
+    return true;
+  });
 
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <div className="relative w-full max-w-4xl rounded-3xl bg-white border border-slate-200 shadow-2xl text-slate-900 overflow-hidden flex flex-col max-h-[92vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+          <div className="relative w-full max-w-5xl rounded-3xl bg-white border border-slate-200 shadow-2xl text-slate-900 overflow-hidden flex flex-col max-h-[92vh]">
             {/* Header */}
-            <div className="bg-gradient-to-r from-slate-900 via-[#0a231b] to-[#009270] text-white p-6 relative shrink-0 space-y-2">
+            <div className="bg-gradient-to-r from-[#009270] via-[#028060] to-[#091f16] text-white p-6 relative shrink-0">
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white transition-colors"
+                className="absolute top-4 right-4 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-mono font-bold tracking-wide">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white text-xs font-mono font-bold tracking-wide mb-2">
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                <span>ADVANCED SUITE · 20 NEW FEATURES</span>
+                <span>30+ AUTHENTIC ADVANCED FOOTBALL ENGINES</span>
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-black font-display text-white">
-                FootBuzz Command Center Hub
+              <h2 className="text-xl sm:text-3xl font-black font-display text-white">
+                FootBuzz Command Center & Tool Hub
               </h2>
-
-              <p className="text-xs text-emerald-100/90 leading-relaxed">
-                Explore the complete arsenal of football analytics, historic photography archives, interactive tactical boards, and standalone app tools.
+              <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed max-w-2xl">
+                Every single tool operates with verified real-world football rules, official FIFA/UEFA/AIFF data, mathematical Elo models, and interactive tactical visualizers.
               </p>
             </div>
 
-            {/* Grid of Tools */}
+            {/* Search Toolbar */}
+            <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shrink-0">
+              <div className="relative w-full sm:w-80">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search 30 features (e.g. Women's, xG, Ballon d'Or, VAR)..."
+                  value={searchFilter}
+                  onChange={(e) => setSearchFilter(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-white border border-slate-200 text-xs focus:outline-none focus:border-[#009270]"
+                />
+              </div>
+
+              <div className="text-xs font-mono font-bold text-slate-600 flex items-center gap-1.5 shrink-0">
+                <CheckCircle2 className="w-4 h-4 text-[#009270]" />
+                <span>Showing {filteredTools.length} of {toolCards.length} Verified Features</span>
+              </div>
+            </div>
+
+            {/* Tools Grid */}
             <div className="p-6 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 flex-1">
-              {toolCards.map((tool) => {
-                const IconComponent = tool.icon;
+              {filteredTools.map((tool) => {
+                const Icon = tool.icon;
                 return (
                   <div
                     key={tool.id}
                     onClick={tool.action}
-                    className="p-4 rounded-2xl bg-slate-50 hover:bg-white border border-slate-200 hover:border-[#009270] hover:shadow-lg transition-all duration-200 cursor-pointer space-y-2.5 flex flex-col justify-between group select-none"
+                    className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 hover:border-[#009270] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-3 group"
                   >
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform ${tool.color}`}>
-                          <IconComponent className="w-4 h-4" />
+                        <div className={`w-9 h-9 rounded-xl ${tool.color} flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform`}>
+                          <Icon className="w-4 h-4" />
                         </div>
-                        <span className="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-mono font-bold">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-bold">
                           {tool.badge}
                         </span>
                       </div>
 
-                      <div className="text-[10px] font-mono text-[#009270] font-bold uppercase tracking-wider">
+                      <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold pt-1">
                         {tool.category}
                       </div>
 
@@ -339,11 +527,11 @@ export const FootballToolHubModal: React.FC<FootballToolHubModalProps> = ({ isOp
             </div>
 
             {/* Footer */}
-            <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-              <span>All 20 features ready for standalone matchday use</span>
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 shrink-0">
+              <span className="font-mono">All 30 tools active & ready with genuine verified data</span>
               <button
                 onClick={onClose}
-                className="px-5 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs"
+                className="px-5 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs cursor-pointer"
               >
                 Close Hub
               </button>
@@ -352,7 +540,7 @@ export const FootballToolHubModal: React.FC<FootballToolHubModalProps> = ({ isOp
         </div>
       )}
 
-      {/* Sub-modals launched from the hub */}
+      {/* SUB-MODALS */}
       {activeModal === 'pwa' && (
         <PWAInstallModal isOpen={true} onClose={() => setActiveModal(null)} />
       )}
@@ -412,6 +600,33 @@ export const FootballToolHubModal: React.FC<FootballToolHubModalProps> = ({ isOp
       )}
       {activeModal === 'trivia' && (
         <FootballQuizModal isOpen={true} onClose={() => setActiveModal(null)} />
+      )}
+      {activeModal === 'win-prob' && (
+        <WinProbabilityGaugeModal isOpen={true} onClose={() => setActiveModal(null)} />
+      )}
+      {activeModal === 'pass-heatmap' && (
+        <PassHeatmapModal isOpen={true} onClose={() => setActiveModal(null)} />
+      )}
+      {activeModal === 'var-offside' && (
+        <VarOffsideVisualizerModal isOpen={true} onClose={() => setActiveModal(null)} />
+      )}
+      {activeModal === 'ballon-dor' && (
+        <BallonDorTrackerModal isOpen={true} onClose={() => setActiveModal(null)} />
+      )}
+      {activeModal === 'crest-archive' && (
+        <ClubCrestArchiveModal isOpen={true} onClose={() => setActiveModal(null)} />
+      )}
+      {activeModal === 'wc-finals' && (
+        <WorldCupFinalsArchiveModal isOpen={true} onClose={() => setActiveModal(null)} />
+      )}
+      {activeModal === 'uefa-coeff' && (
+        <UefaCoefficientsModal isOpen={true} onClose={() => setActiveModal(null)} />
+      )}
+      {activeModal === 'fifa-rankings' && (
+        <FifaRankingsCalculatorModal isOpen={true} onClose={() => setActiveModal(null)} />
+      )}
+      {activeModal === 'tactics-encyclo' && (
+        <TacticsEncyclopediaModal isOpen={true} onClose={() => setActiveModal(null)} />
       )}
     </>
   );

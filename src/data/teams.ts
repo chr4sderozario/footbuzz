@@ -622,3 +622,5 @@ export const TEAMS_DATA: Team[] = [
     squadPlayerIds: [],
   },
 ];
+
+export const TEAMS = TEAMS_DATA;

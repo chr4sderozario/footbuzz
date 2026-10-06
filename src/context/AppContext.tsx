@@ -17,6 +17,7 @@ export type NavTab =
   | 'search'
   | 'lightning-news'
   | 'tournament-countdowns'
+  | 'womens-football'
   | 'account'
   | 'match-centre'
   | 'team-detail'
