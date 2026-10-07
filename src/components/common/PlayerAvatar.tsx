@@ -7,22 +7,132 @@
 
 import React, { useState } from 'react';
 
-// Reliable, hotlink-allowed portrait photos for football icons
+// Reliable, real verified high-resolution portraits for football stars and legends
 const VERIFIED_PORTRAITS: Record<string, string> = {
-  'player-haaland': 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=400&q=80',
-  'player-mbappe': 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=400&q=80',
-  'player-yamal': 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=400&q=80',
-  'player-vinicius': 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?auto=format&fit=crop&w=400&q=80',
-  'player-bellingham': 'https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?auto=format&fit=crop&w=400&q=80',
-  'player-saka': 'https://images.unsplash.com/photo-1543351611-58f69d7c1781?auto=format&fit=crop&w=400&q=80',
-  'player-salah': 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=400&q=80',
-  'player-rodri': 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=400&q=80',
-  'player-chhetri': 'https://images.unsplash.com/photo-1518091043644-c1d4457512c6?auto=format&fit=crop&w=400&q=80',
-  'player-petratos': 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=400&q=80',
-  'player-colaco': 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?auto=format&fit=crop&w=400&q=80',
-  'player-chhangte': 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=400&q=80',
-  'player-messi': 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=400&q=80',
-  'player-ronaldo': 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=400&q=80',
+  // Men's Global Stars
+  'player-messi': '/players/messi.jpg',
+  'player-ronaldo': '/players/ronaldo.jpg',
+  'player-ronaldo-cr7': '/players/ronaldo.jpg',
+  'player-haaland': '/players/haaland.jpg',
+  'player-mbappe': '/players/mbappe.jpg',
+  'player-yamal': '/players/yamal.jpg',
+  'player-vinicius': '/players/vinicius.jpg',
+  'player-bellingham': '/players/bellingham.jpg',
+  'player-saka': '/players/saka.jpg',
+  'player-salah': '/players/salah.jpg',
+  'player-debruyne': '/players/debruyne.jpg',
+  'player-rodri': '/players/rodri.jpg',
+  'player-palmer': '/players/palmer.jpg',
+  'player-foden': '/players/foden.jpg',
+  'player-rice': '/players/rice.jpg',
+  'player-vandijk': '/players/vandijk.jpg',
+  'player-kane': '/players/kane.jpg',
+  'player-lewandowski': '/players/lewandowski.jpg',
+  'player-modric': '/players/modric.jpg',
+  'player-courtois': '/players/courtois.jpg',
+  'player-alisson': '/players/alisson.jpg',
+  'player-odegaard': '/players/odegaard.jpg',
+  'player-pedri': '/players/pedri.jpg',
+  'player-raphinha': '/players/raphinha.jpg',
+
+  // ISL & Indian Football Stars
+  'player-chhetri': '/players/chhetri.jpg',
+  'player-petratos': '/players/petratos.jpg',
+  'player-colaco': '/players/colaco.jpg',
+  'p-colaco': '/players/colaco.jpg',
+  'player-chhangte': '/players/chhangte.jpg',
+  'player-gurpreet': '/players/gurpreet.jpg',
+  'player-jhingan': '/players/jhingan.jpg',
+  'player-thapa': '/players/thapa.jpg',
+  'player-bose': '/players/bose.jpg',
+
+  // Women's Football Superstars
+  'wplayer-aitana': '/players/aitana.jpg',
+  'player-aitana': '/players/aitana.jpg',
+  'wplayer-alexia': '/players/alexia.jpg',
+  'player-alexia': '/players/alexia.jpg',
+  'wplayer-kerr': '/players/sam_kerr.jpg',
+  'player-kerr': '/players/sam_kerr.jpg',
+  'wplayer-russo': '/players/russo.jpg',
+  'player-russo': '/players/russo.jpg',
+  'wplayer-smith': '/players/sophia_smith.jpg',
+  'player-smith': '/players/sophia_smith.jpg',
+  'wplayer-earps': '/players/mary_earps.jpg',
+  'player-earps': '/players/mary_earps.jpg',
+  'wplayer-james': '/players/lauren_james.jpg',
+  'player-james': '/players/lauren_james.jpg',
+  'wplayer-rodman': '/players/trinity_rodman.jpg',
+  'player-rodman': '/players/trinity_rodman.jpg',
+  'wplayer-caicedo': '/players/linda_caicedo.jpg',
+  'player-caicedo': '/players/linda_caicedo.jpg',
+  'wplayer-miedema': '/players/miedema.jpg',
+  'player-miedema': '/players/miedema.jpg',
+  'wplayer-manisha': '/players/manisha.jpg',
+  'player-manisha': '/players/manisha.jpg',
+  'wplayer-bala': '/players/bala_devi.jpg',
+  'player-bala': '/players/bala_devi.jpg',
+
+  // Football Legends
+  'player-pele': '/players/pele.jpg',
+  'player-maradona': '/players/maradona.jpg',
+  'player-zidane': '/players/zidane.jpg',
+};
+
+// Name-based portrait matching fallback
+const getPortraitByName = (name: string): string | undefined => {
+  if (!name) return undefined;
+  const n = name.toLowerCase();
+  if (n.includes('messi')) return '/players/messi.jpg';
+  if (n.includes('ronaldo') && !n.includes('nazario')) return '/players/ronaldo.jpg';
+  if (n.includes('haaland')) return '/players/haaland.jpg';
+  if (n.includes('mbapp') || n.includes('mbappe')) return '/players/mbappe.jpg';
+  if (n.includes('yamal')) return '/players/yamal.jpg';
+  if (n.includes('vinicius') || n.includes('vinícius')) return '/players/vinicius.jpg';
+  if (n.includes('bellingham')) return '/players/bellingham.jpg';
+  if (n.includes('saka')) return '/players/saka.jpg';
+  if (n.includes('salah')) return '/players/salah.jpg';
+  if (n.includes('de bruyne')) return '/players/debruyne.jpg';
+  if (n.includes('rodri')) return '/players/rodri.jpg';
+  if (n.includes('palmer')) return '/players/palmer.jpg';
+  if (n.includes('foden')) return '/players/foden.jpg';
+  if (n.includes('rice')) return '/players/rice.jpg';
+  if (n.includes('van dijk')) return '/players/vandijk.jpg';
+  if (n.includes('kane')) return '/players/kane.jpg';
+  if (n.includes('lewandowski')) return '/players/lewandowski.jpg';
+  if (n.includes('modric') || n.includes('modrić')) return '/players/modric.jpg';
+  if (n.includes('courtois')) return '/players/courtois.jpg';
+  if (n.includes('alisson')) return '/players/alisson.jpg';
+  if (n.includes('odegaard') || n.includes('ødegaard')) return '/players/odegaard.jpg';
+  if (n.includes('pedri')) return '/players/pedri.jpg';
+  if (n.includes('raphinha')) return '/players/raphinha.jpg';
+
+  if (n.includes('chhetri')) return '/players/chhetri.jpg';
+  if (n.includes('petratos')) return '/players/petratos.jpg';
+  if (n.includes('colaco') || n.includes('colaço')) return '/players/colaco.jpg';
+  if (n.includes('chhangte')) return '/players/chhangte.jpg';
+  if (n.includes('gurpreet')) return '/players/gurpreet.jpg';
+  if (n.includes('jhingan')) return '/players/jhingan.jpg';
+  if (n.includes('thapa')) return '/players/thapa.jpg';
+  if (n.includes('bose') && (n.includes('subhasish') || n.includes('subhashish'))) return '/players/bose.jpg';
+
+  if (n.includes('aitana') || n.includes('bonmatí') || n.includes('bonmati')) return '/players/aitana.jpg';
+  if (n.includes('alexia') || n.includes('putellas')) return '/players/alexia.jpg';
+  if (n.includes('kerr')) return '/players/sam_kerr.jpg';
+  if (n.includes('russo')) return '/players/russo.jpg';
+  if (n.includes('sophia smith') || (n.includes('smith') && n.includes('sophia'))) return '/players/sophia_smith.jpg';
+  if (n.includes('earps')) return '/players/mary_earps.jpg';
+  if (n.includes('lauren james')) return '/players/lauren_james.jpg';
+  if (n.includes('rodman')) return '/players/trinity_rodman.jpg';
+  if (n.includes('caicedo') && n.includes('linda')) return '/players/linda_caicedo.jpg';
+  if (n.includes('miedema')) return '/players/miedema.jpg';
+  if (n.includes('manisha') || n.includes('kalyan')) return '/players/manisha.jpg';
+  if (n.includes('bala devi')) return '/players/bala_devi.jpg';
+
+  if (n.includes('pelé') || n === 'pele') return '/players/pele.jpg';
+  if (n.includes('maradona')) return '/players/maradona.jpg';
+  if (n.includes('zidane')) return '/players/zidane.jpg';
+
+  return undefined;
 };
 
 // Team palette gradients for custom football jersey cards
@@ -60,11 +170,17 @@ export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
 }) => {
   const [hasError, setHasError] = useState(false);
 
-  // Match photoUrl from explicit prop or verified open portrait CDNs
+  // Match photoUrl: verified local portraits by ID, then name, then direct photoUrl
   const directPhoto =
-    photoUrl && !photoUrl.includes('espncdn.com') ? photoUrl : undefined;
+    photoUrl && !photoUrl.includes('espncdn.com') && !photoUrl.includes('unsplash.com/photo-')
+      ? photoUrl
+      : undefined;
 
-  const matchedPhoto = directPhoto || VERIFIED_PORTRAITS[id];
+  const matchedPhoto =
+    VERIFIED_PORTRAITS[id] ||
+    VERIFIED_PORTRAITS[id.toLowerCase()] ||
+    getPortraitByName(name) ||
+    directPhoto;
 
   const sizeClasses = {
     xs: 'w-7 h-7 text-[10px]',

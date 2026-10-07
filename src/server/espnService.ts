@@ -137,9 +137,9 @@ export function parseEspnEvent(ev: any, fallbackDateStr?: string): Match | null 
         teamId: `team-${teamId}`,
         teamName: teamId === String(homeComp.team.id) ? homeComp.team.displayName : awayComp.team.displayName,
         playerId: athlete.id ? `p-${athlete.id}` : undefined,
-        playerName: athlete.displayName || athlete.shortName || 'Player',
-        playerInName: isSub ? subIn.displayName || subIn.shortName : undefined,
-        playerOutName: isSub ? subOut.displayName || subOut.shortName : undefined,
+        playerName: athlete.fullName || athlete.displayName || athlete.name || athlete.shortName || `${teamId === String(homeComp.team.id) ? homeComp.team.displayName : awayComp.team.displayName}`,
+        playerInName: isSub ? (subIn.fullName || subIn.displayName || subIn.name || subIn.shortName) : undefined,
+        playerOutName: isSub ? (subOut.fullName || subOut.displayName || subOut.name || subOut.shortName) : undefined,
         detail: d.text || d.description || d.type?.text,
         isHomeTeam: teamId === String(homeComp.team.id),
       });
@@ -187,14 +187,25 @@ export function parseEspnEvent(ev: any, fallbackDateStr?: string): Match | null 
       const starting = (roster.roster || []).filter((p: any) => p.starter === true);
       const bench = (roster.roster || []).filter((p: any) => p.starter === false);
       const coach = roster.coach?.[0]?.displayName || (isHome ? 'Manager' : 'Head Coach');
-      const formatPlayer = (p: any) => ({
-        playerId: `p-${p.athlete?.id || Math.random()}`,
-        name: p.athlete?.displayName || p.athlete?.shortName || 'Player',
-        shirtNumber: parseInt(String(p.jersey || p.athlete?.jersey || '0'), 10) || 1,
-        position: p.position?.abbreviation || p.athlete?.position?.abbreviation || 'MF',
-        gridPosition: { x: 50, y: 50 },
-        isCaptain: p.captain || false,
-      });
+      const formatPlayer = (p: any) => {
+        const jerseyNum = parseInt(String(p.jersey || p.athlete?.jersey || '0'), 10) || 1;
+        const athleteName =
+          p.athlete?.fullName ||
+          p.athlete?.displayName ||
+          p.athlete?.name ||
+          p.athlete?.shortName ||
+          p.displayName ||
+          p.name ||
+          `${isHome ? homeTeamName : awayTeamName} #${jerseyNum}`;
+        return {
+          playerId: `p-${p.athlete?.id || jerseyNum || Math.random()}`,
+          name: athleteName,
+          shirtNumber: jerseyNum,
+          position: p.position?.abbreviation || p.athlete?.position?.abbreviation || 'MF',
+          gridPosition: { x: 50, y: 50 },
+          isCaptain: p.captain || false,
+        };
+      };
 
       return {
         formation: roster.formation || '4-3-3',

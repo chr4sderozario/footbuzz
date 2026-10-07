@@ -180,7 +180,7 @@ const MatchCentreContent: React.FC<{ match: Match }> = ({ match }) => {
           teamId: `team-${teamId}`,
           teamName: d.team?.displayName || (teamId.includes(match.homeTeam.id.replace('team-', '')) ? match.homeTeam.name : match.awayTeam.name),
           playerId: athlete.id ? `p-${athlete.id}` : undefined,
-          playerName: athlete.displayName || athlete.shortName || 'Player',
+          playerName: athlete.fullName || athlete.displayName || athlete.name || athlete.shortName || (d.team?.displayName || match.homeTeam.name),
           detail: d.text || d.description || d.type?.text,
           isHomeTeam: teamId.includes(match.homeTeam.id.replace('team-', '')),
         });
@@ -197,14 +197,26 @@ const MatchCentreContent: React.FC<{ match: Match }> = ({ match }) => {
       const starting = (roster.roster || []).filter((p: any) => p.starter === true);
       const bench = (roster.roster || []).filter((p: any) => p.starter === false);
       const coach = roster.coach?.[0]?.displayName || (isHome ? 'Manager' : 'Head Coach');
-      const formatPlayer = (p: any) => ({
-        playerId: `p-${p.athlete?.id || Math.random()}`,
-        name: p.athlete?.displayName || p.athlete?.shortName || 'Player',
-        shirtNumber: parseInt(String(p.jersey || p.athlete?.jersey || '0'), 10) || 1,
-        position: p.position?.abbreviation || p.athlete?.position?.abbreviation || 'MF',
-        gridPosition: { x: 50, y: 50 },
-        isCaptain: p.captain || false,
-      });
+      const teamLabel = isHome ? match.homeTeam.name : match.awayTeam.name;
+      const formatPlayer = (p: any) => {
+        const jerseyNum = parseInt(String(p.jersey || p.athlete?.jersey || '0'), 10) || 1;
+        const athleteName =
+          p.athlete?.fullName ||
+          p.athlete?.displayName ||
+          p.athlete?.name ||
+          p.athlete?.shortName ||
+          p.displayName ||
+          p.name ||
+          `${teamLabel} #${jerseyNum}`;
+        return {
+          playerId: `p-${p.athlete?.id || jerseyNum || Math.random()}`,
+          name: athleteName,
+          shirtNumber: jerseyNum,
+          position: p.position?.abbreviation || p.athlete?.position?.abbreviation || 'MF',
+          gridPosition: { x: 50, y: 50 },
+          isCaptain: p.captain || false,
+        };
+      };
       return {
         formation: roster.formation || '4-3-3',
         coach,
@@ -628,7 +640,66 @@ const MatchCentreContent: React.FC<{ match: Match }> = ({ match }) => {
       {/* ========================================================================= */}
       {activeTab === 'overview' && (
         <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/90 p-6 shadow-xs space-y-6">
-          <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider font-display">Match Overview</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider font-display">Match Overview</h3>
+            {(isLive || match.status === 'FINISHED') && (
+              <span className="font-mono text-xs font-black px-2.5 py-1 rounded-lg bg-slate-900 text-white shadow-2xs">
+                {match.score.home ?? 0} – {match.score.away ?? 0}
+              </span>
+            )}
+          </div>
+
+          {/* Goal Scorers Showcase (Feature: Detailed Player Goal Stats) */}
+          {(isLive || match.status === 'FINISHED') && goalEvents.length > 0 && (
+            <div className="p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-emerald-500/5 to-slate-50 border border-amber-200/80 space-y-3">
+              <div className="flex items-center justify-between text-xs font-black text-slate-900 pb-2 border-b border-amber-200/60">
+                <span className="flex items-center gap-1.5 uppercase tracking-wider">
+                  <span className="text-amber-500">⚽</span> Match Goalscorers
+                </span>
+                <span className="text-slate-500 font-mono text-[11px] font-bold">
+                  {goalEvents.length} Total {goalEvents.length === 1 ? 'Goal' : 'Goals'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {goalEvents.map((g, idx) => (
+                  <div
+                    key={`ov-goal-${idx}-${g.playerName}`}
+                    onClick={() => {
+                      if (g.playerId) {
+                        navigateTo('player-detail', { playerId: g.playerId });
+                      }
+                    }}
+                    className={`p-2.5 rounded-xl bg-white border border-slate-200/90 flex items-center justify-between gap-2.5 shadow-2xs hover:border-[#009270] transition-all ${
+                      g.playerId ? 'cursor-pointer hover:scale-[1.01]' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <PlayerAvatar
+                        id={g.playerId}
+                        name={g.playerName}
+                        size="sm"
+                      />
+                      <div className="min-w-0">
+                        <div className="text-xs font-black text-slate-900 truncate hover:text-[#009270]">
+                          {g.playerName}
+                        </div>
+                        <div className="text-[10px] text-slate-500 truncate">
+                          {g.teamName || (g.isHomeTeam ? match.homeTeam.name : match.awayTeam.name)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 font-mono text-xs font-bold">
+                        ⚽ {g.minute}'
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-700">
             <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
               <div className="font-bold text-slate-900 text-sm">Fixture Information</div>
@@ -1022,9 +1093,9 @@ const MatchCentreContent: React.FC<{ match: Match }> = ({ match }) => {
                   <div key={sub.id} className="p-3.5 rounded-2xl bg-blue-50/60 border border-blue-200 flex items-center justify-between gap-3 text-xs">
                     <span className="font-mono font-bold text-blue-800">{sub.minute}'</span>
                     <div className="flex items-center gap-2 truncate">
-                      <span className="text-rose-600 font-bold truncate">OUT: {sub.playerOutName || 'Player'}</span>
+                      <span className="text-rose-600 font-bold truncate">OUT: {sub.playerOutName || sub.detail || 'Outgoing'}</span>
                       <span>⇄</span>
-                      <span className="text-emerald-700 font-bold truncate">IN: {sub.playerInName || 'Player'}</span>
+                      <span className="text-emerald-700 font-bold truncate">IN: {sub.playerInName || sub.playerName || 'Incoming'}</span>
                     </div>
                   </div>
                 ))}
@@ -1247,32 +1318,205 @@ const MatchCentreContent: React.FC<{ match: Match }> = ({ match }) => {
       {/* TAB 4: STATISTICS */}
       {/* ========================================================================= */}
       {activeTab === 'stats' && (
-        <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-            <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider font-display">
-              Match Statistics
-            </h3>
-            <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md font-bold">
-              Official Provider Verified
-            </span>
+        <div className="space-y-6">
+          {/* Dedicated Goal Stats & Goalscorers Section */}
+          <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold text-base shadow-2xs">
+                  ⚽
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider font-display">
+                    Goal Statistics & Goalscorers
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Official goalscorers, scoring minutes, and penalty breakdowns
+                  </p>
+                </div>
+              </div>
+              <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full font-bold">
+                {match.score.home ?? 0} – {match.score.away ?? 0}
+              </span>
+            </div>
+
+            {/* Goalscorers Grid: Home Team vs Away Team */}
+            {goalEvents.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Home Team Goals & Scorers */}
+                <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-3">
+                  <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-200">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <ClubCrest
+                        name={match.homeTeam.name}
+                        code={match.homeTeam.code}
+                        country={match.homeTeam.country}
+                        crestUrl={match.homeTeam.crestUrl}
+                        size="xs"
+                      />
+                      <span className="text-xs font-black text-slate-900 truncate">
+                        {match.homeTeam.name}
+                      </span>
+                    </div>
+                    <span className="font-mono text-xs font-black px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-900">
+                      {goalEvents.filter((g) => g.isHomeTeam || g.teamId === match.homeTeam.id).length} {goalEvents.filter((g) => g.isHomeTeam || g.teamId === match.homeTeam.id).length === 1 ? 'Goal' : 'Goals'}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {goalEvents.filter((g) => g.isHomeTeam || g.teamId === match.homeTeam.id).length > 0 ? (
+                      goalEvents
+                        .filter((g) => g.isHomeTeam || g.teamId === match.homeTeam.id)
+                        .map((g, idx) => (
+                          <div
+                            key={`hg-${idx}-${g.playerName}`}
+                            onClick={() => {
+                              if (g.playerId) {
+                                navigateTo('player-detail', { playerId: g.playerId });
+                              }
+                            }}
+                            className={`p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-3 shadow-2xs hover:border-[#009270] transition-all ${
+                              g.playerId ? 'cursor-pointer hover:shadow-xs' : ''
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <PlayerAvatar
+                                id={g.playerId}
+                                name={g.playerName}
+                                size="sm"
+                              />
+                              <div className="min-w-0">
+                                <div className="text-xs font-black text-slate-900 truncate hover:text-[#009270]">
+                                  {g.playerName}
+                                </div>
+                                <div className="text-[10px] text-slate-500 flex items-center gap-1 font-mono">
+                                  <span>{g.type === 'PENALTY_GOAL' ? '🎯 Penalty' : '⚽ Goal'}</span>
+                                  {g.detail && <span className="truncate">· {g.detail}</span>}
+                                </div>
+                              </div>
+                            </div>
+                            <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-[#009270] font-mono text-xs font-bold border border-emerald-200 shrink-0">
+                              {g.minute}'
+                            </span>
+                          </div>
+                        ))
+                    ) : (
+                      <div className="py-4 text-center text-xs text-slate-400 italic">
+                        No goals scored by {match.homeTeam.shortName}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Away Team Goals & Scorers */}
+                <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-3">
+                  <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-200">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <ClubCrest
+                        name={match.awayTeam.name}
+                        code={match.awayTeam.code}
+                        country={match.awayTeam.country}
+                        crestUrl={match.awayTeam.crestUrl}
+                        size="xs"
+                      />
+                      <span className="text-xs font-black text-slate-900 truncate">
+                        {match.awayTeam.name}
+                      </span>
+                    </div>
+                    <span className="font-mono text-xs font-black px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-900">
+                      {goalEvents.filter((g) => !g.isHomeTeam && g.teamId !== match.homeTeam.id).length} {goalEvents.filter((g) => !g.isHomeTeam && g.teamId !== match.homeTeam.id).length === 1 ? 'Goal' : 'Goals'}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {goalEvents.filter((g) => !g.isHomeTeam && g.teamId !== match.homeTeam.id).length > 0 ? (
+                      goalEvents
+                        .filter((g) => !g.isHomeTeam && g.teamId !== match.homeTeam.id)
+                        .map((g, idx) => (
+                          <div
+                            key={`ag-${idx}-${g.playerName}`}
+                            onClick={() => {
+                              if (g.playerId) {
+                                navigateTo('player-detail', { playerId: g.playerId });
+                              }
+                            }}
+                            className={`p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-3 shadow-2xs hover:border-[#009270] transition-all ${
+                              g.playerId ? 'cursor-pointer hover:shadow-xs' : ''
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <PlayerAvatar
+                                id={g.playerId}
+                                name={g.playerName}
+                                size="sm"
+                              />
+                              <div className="min-w-0">
+                                <div className="text-xs font-black text-slate-900 truncate hover:text-[#009270]">
+                                  {g.playerName}
+                                </div>
+                                <div className="text-[10px] text-slate-500 flex items-center gap-1 font-mono">
+                                  <span>{g.type === 'PENALTY_GOAL' ? '🎯 Penalty' : '⚽ Goal'}</span>
+                                  {g.detail && <span className="truncate">· {g.detail}</span>}
+                                </div>
+                              </div>
+                            </div>
+                            <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-[#009270] font-mono text-xs font-bold border border-emerald-200 shrink-0">
+                              {g.minute}'
+                            </span>
+                          </div>
+                        ))
+                    ) : (
+                      <div className="py-4 text-center text-xs text-slate-400 italic">
+                        No goals scored by {match.awayTeam.shortName}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : isLive || match.status === 'FINISHED' ? (
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500">
+                Scores level at 0–0. No goals have been scored in this match.
+              </div>
+            ) : (
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500">
+                Goal statistics and goalscorer profiles will update live during match coverage.
+              </div>
+            )}
           </div>
-          {activeStats ? (
-            <div className="space-y-3">
-              {statBar('Possession', activeStats.possession[0], activeStats.possession[1], true)}
-              {statBar('Shots on Target', activeStats.shotsOnTarget[0], activeStats.shotsOnTarget[1])}
-              {statBar('Total Shots', activeStats.shotsTotal[0], activeStats.shotsTotal[1])}
-              {statBar('Corner Kicks', activeStats.corners[0], activeStats.corners[1])}
-              {statBar('Fouls Committed', activeStats.fouls[0], activeStats.fouls[1])}
-              {activeStats.yellowCards && statBar('Yellow Cards', activeStats.yellowCards[0], activeStats.yellowCards[1])}
-              {activeStats.redCards && (activeStats.redCards[0] > 0 || activeStats.redCards[1] > 0) && statBar('Red Cards', activeStats.redCards[0], activeStats.redCards[1])}
-              {activeStats.offsides && statBar('Offsides', activeStats.offsides[0], activeStats.offsides[1])}
-              {activeStats.saves && statBar('Goalkeeper Saves', activeStats.saves[0], activeStats.saves[1])}
+
+          {/* Full Match Statistics Matrix */}
+          <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider font-display">
+                Team Performance Statistics
+              </h3>
+              <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md font-bold">
+                Official Provider Verified
+              </span>
             </div>
-          ) : (
-            <div className="p-8 text-center text-xs text-slate-500">
-              Live statistics tracking activates during match play. Check back during live coverage or post-match.
-            </div>
-          )}
+            {activeStats ? (
+              <div className="space-y-3">
+                {statBar(
+                  'Goals Scored',
+                  match.score.home !== null ? match.score.home : goalEvents.filter((g) => g.isHomeTeam || g.teamId === match.homeTeam.id).length,
+                  match.score.away !== null ? match.score.away : goalEvents.filter((g) => !g.isHomeTeam && g.teamId !== match.homeTeam.id).length
+                )}
+                {statBar('Possession', activeStats.possession[0], activeStats.possession[1], true)}
+                {statBar('Shots on Target', activeStats.shotsOnTarget[0], activeStats.shotsOnTarget[1])}
+                {statBar('Total Shots', activeStats.shotsTotal[0], activeStats.shotsTotal[1])}
+                {statBar('Corner Kicks', activeStats.corners[0], activeStats.corners[1])}
+                {statBar('Fouls Committed', activeStats.fouls[0], activeStats.fouls[1])}
+                {activeStats.yellowCards && statBar('Yellow Cards', activeStats.yellowCards[0], activeStats.yellowCards[1])}
+                {activeStats.redCards && (activeStats.redCards[0] > 0 || activeStats.redCards[1] > 0) && statBar('Red Cards', activeStats.redCards[0], activeStats.redCards[1])}
+                {activeStats.offsides && statBar('Offsides', activeStats.offsides[0], activeStats.offsides[1])}
+                {activeStats.saves && statBar('Goalkeeper Saves', activeStats.saves[0], activeStats.saves[1])}
+              </div>
+            ) : (
+              <div className="p-8 text-center text-xs text-slate-500">
+                Live statistics tracking activates during match play. Check back during live coverage or post-match.
+              </div>
+            )}
+          </div>
         </div>
       )}
 

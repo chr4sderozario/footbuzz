@@ -4,8 +4,8 @@
  * Cricbuzz-style Football Command Centre Header
  */
 
-import React, { useState } from 'react';
-import { Search, User, Menu, X, Globe, Trophy, ChevronRight, Sparkles, Layers, Crown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, User, Menu, X, Globe, Trophy, ChevronRight, Sparkles, Layers, Crown, Flame, Zap } from 'lucide-react';
 import { NavTab, useApp } from '../../context/AppContext';
 import { PWAInstallButton } from '../common/PWAInstallButton';
 import { FootballToolHubModal } from '../tools/FootballToolHubModal';
@@ -26,6 +26,23 @@ export const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [toolHubOpen, setToolHubOpen] = useState(false);
   const [subPlansOpen, setSubPlansOpen] = useState(false);
+
+  // Dynamic 10-second alternating logo animations (different each time)
+  const [logoAnimIdx, setLogoAnimIdx] = useState(0);
+  const [isLogoActive, setIsLogoActive] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLogoAnimIdx((prev) => (prev + 1) % 5);
+      setIsLogoActive(true);
+      const timer = setTimeout(() => {
+        setIsLogoActive(false);
+      }, 2400);
+      return () => clearTimeout(timer);
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const mainNavItems: { id: NavTab; label: string }[] = [
     { id: 'home', label: 'Home' },
@@ -61,9 +78,9 @@ export const Header: React.FC = () => {
     <header className="sticky top-0 z-40 w-full shadow-md select-none">
       {/* Tier 1: Cricbuzz Signature Emerald Brand Bar */}
       <div className="bg-[#009270] text-white">
-        <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-1.5 sm:gap-4 overflow-hidden">
-          {/* Brand Wordmark */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 h-14 flex items-center justify-between gap-1.5 sm:gap-3 overflow-hidden">
+          {/* Brand Wordmark with 10-Second Alternating Dynamic Animation */}
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-1.5 text-white/90 hover:text-white rounded-lg hover:bg-black/10 transition-colors cursor-pointer"
@@ -80,22 +97,104 @@ export const Header: React.FC = () => {
                   window.location.reload();
                 }
               }}
-              className="flex items-center gap-1.5 group text-left cursor-pointer"
+              className={`flex items-center gap-1.5 group text-left cursor-pointer transition-all duration-500 rounded-xl px-1.5 py-1 ${
+                isLogoActive && logoAnimIdx === 0
+                  ? 'scale-105 shadow-lg shadow-emerald-400/40 ring-2 ring-emerald-300/80 bg-emerald-800/40'
+                  : isLogoActive && logoAnimIdx === 1
+                  ? 'scale-110 -translate-y-0.5 bg-black/20 shadow-md ring-2 ring-amber-400'
+                  : isLogoActive && logoAnimIdx === 2
+                  ? 'scale-105 bg-gradient-to-r from-emerald-600 to-teal-700 shadow-md ring-1 ring-white/50'
+                  : isLogoActive && logoAnimIdx === 3
+                  ? '-translate-y-1 scale-105 bg-black/15 shadow-md ring-2 ring-emerald-200'
+                  : isLogoActive && logoAnimIdx === 4
+                  ? 'scale-105 bg-amber-500/20 shadow-lg shadow-amber-500/30 ring-2 ring-amber-300'
+                  : 'hover:bg-white/10'
+              }`}
               title="Click for Home | Double-click to replay intro video"
             >
               <div className="flex items-center">
-                <span className="text-xl sm:text-2xl font-black tracking-tight text-white font-display">
+                {/* Dynamic animated ball or sparkle badge */}
+                <span
+                  className={`inline-block mr-1 text-base transition-all duration-500 ${
+                    isLogoActive && logoAnimIdx === 0
+                      ? 'rotate-360 scale-125'
+                      : isLogoActive && logoAnimIdx === 1
+                      ? 'animate-ping'
+                      : isLogoActive && logoAnimIdx === 3
+                      ? 'animate-bounce'
+                      : ''
+                  }`}
+                >
+                  {isLogoActive && logoAnimIdx === 4 ? '🏆' : isLogoActive && logoAnimIdx === 1 ? '⚡' : '⚽'}
+                </span>
+
+                <span
+                  className={`text-xl sm:text-2xl font-black tracking-tight font-display transition-all duration-500 ${
+                    isLogoActive && logoAnimIdx === 2
+                      ? 'bg-gradient-to-r from-white via-amber-200 to-emerald-200 bg-clip-text text-transparent drop-shadow-md'
+                      : 'text-white'
+                  }`}
+                >
                   foot<span className="text-emerald-200 font-extrabold">buzz</span>
                 </span>
-                <span className="ml-1.5 hidden xs:inline-block px-1.5 py-0.5 rounded bg-white/20 text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-100">
-                  Live
+
+                <span
+                  className={`ml-1.5 hidden xs:inline-block px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-wider transition-all duration-500 ${
+                    isLogoActive && logoAnimIdx === 1
+                      ? 'bg-amber-400 text-slate-950 scale-110 shadow-xs'
+                      : isLogoActive && logoAnimIdx === 4
+                      ? 'bg-amber-300 text-slate-950 font-black'
+                      : 'bg-white/20 text-emerald-100'
+                  }`}
+                >
+                  {isLogoActive && logoAnimIdx === 1 ? 'LIVE 🔥' : isLogoActive && logoAnimIdx === 4 ? 'ELITE ★' : 'Live'}
                 </span>
               </div>
             </button>
           </div>
 
-          {/* Main Primary Nav Links (Desktop) */}
-          <nav className="hidden md:flex items-center gap-1 lg:gap-2 text-xs font-semibold text-white/90">
+          {/* SEARCH BUTTON & QUICK BAR (Placed right after the FootBuzz logo for easy access) */}
+          <div className="flex items-center gap-1 shrink-0">
+            {/* Desktop Quick Search Bar */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                navigateTo('search');
+              }}
+              className="hidden xl:flex items-center gap-1.5 bg-black/25 hover:bg-black/35 focus-within:bg-white focus-within:text-slate-900 border border-white/20 focus-within:border-emerald-400 rounded-xl px-2.5 py-1 transition-all shadow-inner"
+            >
+              <Search className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
+              <input
+                type="text"
+                placeholder="Search football..."
+                value={globalSearchQuery}
+                onChange={(e) => setGlobalSearchQuery(e.target.value)}
+                onFocus={() => {
+                  if (currentTab !== 'search') navigateTo('search');
+                }}
+                className="bg-transparent border-none text-xs text-white placeholder-white/70 focus:text-slate-900 focus:placeholder-slate-400 focus:outline-none w-28 lg:w-36 transition-all font-medium"
+              />
+              <button
+                type="submit"
+                className="px-1.5 py-0.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-950 text-emerald-200 border border-emerald-400/40 font-bold text-[10px] transition-colors shrink-0 cursor-pointer"
+              >
+                Go
+              </button>
+            </form>
+
+            {/* Quick 1-Tap Search Button for Instant Access */}
+            <button
+              onClick={() => navigateTo('search')}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-black/20 hover:bg-black/35 active:scale-95 text-white text-xs font-bold transition-all border border-white/20 shadow-xs cursor-pointer"
+              title="Search Football Matches, Teams & Players"
+            >
+              <Search className="w-3.5 h-3.5 text-emerald-300" />
+              <span className="hidden sm:inline text-xs">Search</span>
+            </button>
+          </div>
+
+          {/* Horizontally Scrollable Top Menu (Smooth Left/Right Scroll Strip) */}
+          <nav className="flex-1 min-w-0 overflow-x-auto no-scrollbar scroll-smooth flex items-center gap-1 py-1 px-1 mx-1 sm:mx-2">
             {mainNavItems.map((item) => {
               const isActive =
                 currentTab === item.id ||
@@ -109,9 +208,9 @@ export const Header: React.FC = () => {
                 <button
                   key={item.id}
                   onClick={() => navigateTo(item.id)}
-                  className={`px-3 py-1.5 rounded-md transition-all whitespace-nowrap ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                     isActive
-                      ? 'bg-black/20 text-white font-bold shadow-inner'
+                      ? 'bg-black/25 text-white shadow-inner ring-1 ring-white/30 font-black'
                       : 'hover:bg-white/10 text-white/90 hover:text-white'
                   }`}
                 >
@@ -121,44 +220,8 @@ export const Header: React.FC = () => {
             })}
           </nav>
 
-          {/* Primary Actions & User Auth */}
-          <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
-            {/* Interactive Search Bar Form (Header) */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                navigateTo('search');
-              }}
-              className="hidden lg:flex items-center gap-1.5 bg-black/20 hover:bg-black/30 focus-within:bg-white focus-within:text-slate-900 border border-white/25 focus-within:border-emerald-400 rounded-xl px-2.5 py-1 transition-all shadow-inner"
-            >
-              <Search className="w-3.5 h-3.5 text-emerald-200 shrink-0" />
-              <input
-                type="text"
-                placeholder="Search matches, history, teams..."
-                value={globalSearchQuery}
-                onChange={(e) => setGlobalSearchQuery(e.target.value)}
-                onFocus={() => {
-                  if (currentTab !== 'search') navigateTo('search');
-                }}
-                className="bg-transparent border-none text-xs text-white placeholder-white/75 focus:text-slate-900 focus:placeholder-slate-400 focus:outline-none w-32 xl:w-48 transition-all font-medium"
-              />
-              <button
-                type="submit"
-                className="px-2 py-0.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-950 text-emerald-200 border border-emerald-400/40 font-bold text-[11px] transition-colors shrink-0 cursor-pointer"
-              >
-                Search
-              </button>
-            </form>
-
-            {/* Mobile / Tablet Search Button */}
-            <button
-              onClick={() => navigateTo('search')}
-              className="lg:hidden flex items-center justify-center p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-black/20 text-white text-xs font-bold cursor-pointer"
-              title="Global Football Search"
-            >
-              <Search className="w-4 h-4" />
-            </button>
-
+          {/* Right Action Controls & User Auth */}
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {/* Subscriptions (Plus / Pro / Max) Trigger Button */}
             <button
               onClick={() => setSubPlansOpen(true)}
@@ -166,7 +229,7 @@ export const Header: React.FC = () => {
               title="FootBuzz Subscriptions (Plus, Pro, Max) — Coming Soon"
             >
               <Crown className="w-3.5 h-3.5 fill-current" />
-              <span className="hidden sm:inline">Subscriptions</span>
+              <span className="hidden md:inline">Subscriptions</span>
               <span className="px-1.5 py-0.2 rounded-full bg-slate-950 text-amber-300 text-[9px] font-mono font-black uppercase">
                 Soon
               </span>
@@ -175,7 +238,7 @@ export const Header: React.FC = () => {
             {/* Intro & League Guide Trigger */}
             <button
               onClick={() => setIntroModalOpen(true)}
-              className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-colors border border-white/20"
+              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-colors border border-white/20"
               title="FootBuzz League Guide & Tour"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
@@ -185,15 +248,15 @@ export const Header: React.FC = () => {
             {/* Advanced 20 Features Hub Trigger */}
             <button
               onClick={() => setToolHubOpen(true)}
-              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-950 border border-emerald-400/40 text-emerald-200 hover:text-white text-xs font-black transition-all shadow-xs"
+              className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-950 border border-emerald-400/40 text-emerald-200 hover:text-white text-xs font-black transition-all shadow-xs"
               title="Open FootBuzz 20 Advanced Features & Tools"
             >
               <Layers className="w-3.5 h-3.5 text-emerald-300" />
-              <span className="hidden md:inline">Hub (20)</span>
+              <span>Hub</span>
             </button>
 
             {/* PWA Install Button */}
-            <div className="hidden sm:block">
+            <div className="hidden lg:block">
               <PWAInstallButton />
             </div>
 

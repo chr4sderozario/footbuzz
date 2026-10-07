@@ -17,6 +17,7 @@ import {
 import { footballApi } from '../../services/footballApi';
 import { useApp } from '../../context/AppContext';
 import { MatchCard } from '../matches/MatchCard';
+import { PlayerAvatar } from '../common/PlayerAvatar';
 
 export const HistoryPage: React.FC = () => {
   const tournaments = footballApi.getHistoricTournaments();
@@ -219,9 +220,14 @@ export const HistoryPage: React.FC = () => {
               onClick={() => navigateTo('player-detail', { playerId: legend.id })}
               className="group p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 hover:border-[#009270] hover:shadow-md transition-all cursor-pointer space-y-2 text-center"
             >
-              <div className="w-12 h-12 mx-auto rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-mono font-black text-sm text-slate-900">
-                #{legend.number}
-              </div>
+              <PlayerAvatar
+                id={legend.id}
+                name={legend.name}
+                photoUrl={legend.photoUrl}
+                size="lg"
+                className="mx-auto"
+                number={legend.number}
+              />
               <h3 className="text-sm font-black text-slate-900 group-hover:text-[#009270] transition-colors">
                 {legend.name}
               </h3>

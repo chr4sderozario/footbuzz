@@ -130,6 +130,21 @@ export const MatchComparisonModal: React.FC<MatchComparisonModalProps> = ({
               </div>
               <span className="font-mono text-xl font-black text-white">{matchA.score.away}</span>
             </div>
+            {/* Goalscorers for Match A */}
+            {matchA.events && matchA.events.filter((e) => e.type === 'GOAL' || e.type === 'PENALTY_GOAL').length > 0 && (
+              <div className="pt-2 border-t border-slate-800 text-[11px] text-amber-300 font-medium space-y-0.5">
+                {matchA.events
+                  .filter((e) => e.type === 'GOAL' || e.type === 'PENALTY_GOAL')
+                  .map((g, i) => (
+                    <div key={i} className="flex items-center gap-1.5 truncate">
+                      <span>⚽</span>
+                      <span className="font-bold text-white">{g.playerName}</span>
+                      <span className="text-slate-400 font-mono text-[10px]">{g.minute}'</span>
+                      <span className="text-slate-500 text-[10px]">({g.teamName || (g.isHomeTeam ? matchA.homeTeam.code : matchA.awayTeam.code)})</span>
+                    </div>
+                  ))}
+              </div>
+            )}
             <div className="mt-2 text-[11px] text-slate-400 flex items-center justify-between">
               <span>{matchA.date}</span>
               <span>{matchA.venue}</span>
@@ -153,6 +168,21 @@ export const MatchComparisonModal: React.FC<MatchComparisonModalProps> = ({
               </div>
               <span className="font-mono text-xl font-black text-white">{matchB.score.away}</span>
             </div>
+            {/* Goalscorers for Match B */}
+            {matchB.events && matchB.events.filter((e) => e.type === 'GOAL' || e.type === 'PENALTY_GOAL').length > 0 && (
+              <div className="pt-2 border-t border-slate-800 text-[11px] text-amber-300 font-medium space-y-0.5">
+                {matchB.events
+                  .filter((e) => e.type === 'GOAL' || e.type === 'PENALTY_GOAL')
+                  .map((g, i) => (
+                    <div key={i} className="flex items-center gap-1.5 truncate">
+                      <span>⚽</span>
+                      <span className="font-bold text-white">{g.playerName}</span>
+                      <span className="text-slate-400 font-mono text-[10px]">{g.minute}'</span>
+                      <span className="text-slate-500 text-[10px]">({g.teamName || (g.isHomeTeam ? matchB.homeTeam.code : matchB.awayTeam.code)})</span>
+                    </div>
+                  ))}
+              </div>
+            )}
             <div className="mt-2 text-[11px] text-slate-400 flex items-center justify-between">
               <span>{matchB.date}</span>
               <span>{matchB.venue}</span>
@@ -166,6 +196,11 @@ export const MatchComparisonModal: React.FC<MatchComparisonModalProps> = ({
             <BarChart3 className="w-4 h-4 text-emerald-400" /> Statistical Comparison
           </h3>
 
+          {compareStat(
+            [matchA.score.home ?? 0, matchA.score.away ?? 0],
+            [matchB.score.home ?? 0, matchB.score.away ?? 0],
+            'Goals Scored'
+          )}
           {compareStat(matchA.statistics?.possession, matchB.statistics?.possession, 'Possession (%)')}
           {compareStat(matchA.statistics?.shotsTotal, matchB.statistics?.shotsTotal, 'Total Shots')}
           {compareStat(matchA.statistics?.shotsOnTarget, matchB.statistics?.shotsOnTarget, 'Shots on Target')}

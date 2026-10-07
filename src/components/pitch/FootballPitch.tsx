@@ -44,12 +44,14 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
   const displayHomePlayers = tacticalPhase
     ? tacticalPhase.homeNodes.map((n) => {
         const matchingLineup = homePlayers.find((p) => p.playerId === n.playerId);
+        const rawName = matchingLineup?.name || n.name || '';
+        const cleanName = rawName.replace(/^Player\s+\d+$/i, '').trim() || matchingLineup?.name || (homeTeamName ? `${homeTeamName} #${n.number}` : `#${n.number}`);
         return {
           playerId: n.playerId,
-          name: n.name,
+          name: cleanName,
           number: n.number,
           position: (matchingLineup?.position || 'MF') as LineupPlayer['position'],
-          role: matchingLineup?.role || 'Player',
+          role: matchingLineup?.role || 'Midfielder',
           gridPos: { x: n.x, y: n.y },
           rating: matchingLineup?.rating,
           isCaptain: matchingLineup?.isCaptain,
@@ -62,12 +64,14 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
   const displayAwayPlayers = tacticalPhase
     ? tacticalPhase.awayNodes.map((n) => {
         const matchingLineup = awayPlayers.find((p) => p.playerId === n.playerId);
+        const rawName = matchingLineup?.name || n.name || '';
+        const cleanName = rawName.replace(/^Player\s+\d+$/i, '').trim() || matchingLineup?.name || (awayTeamName ? `${awayTeamName} #${n.number}` : `#${n.number}`);
         return {
           playerId: n.playerId,
-          name: n.name,
+          name: cleanName,
           number: n.number,
           position: (matchingLineup?.position || 'MF') as LineupPlayer['position'],
-          role: matchingLineup?.role || 'Player',
+          role: matchingLineup?.role || 'Midfielder',
           gridPos: { x: n.x, y: n.y },
           rating: matchingLineup?.rating,
           isCaptain: matchingLineup?.isCaptain,

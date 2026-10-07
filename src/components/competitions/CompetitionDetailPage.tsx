@@ -10,6 +10,7 @@ import { useApp } from '../../context/AppContext';
 import { ClubCrest } from '../common/ClubCrest';
 import { CompetitionBadge } from '../common/CompetitionBadge';
 import { MatchCard } from '../matches/MatchCard';
+import { PlayerAvatar } from '../common/PlayerAvatar';
 
 export const CompetitionDetailPage: React.FC<{ competitionId: string }> = ({ competitionId }) => {
   const comp = footballApi.getCompetitionById(competitionId);
@@ -211,21 +212,26 @@ export const CompetitionDetailPage: React.FC<{ competitionId: string }> = ({ com
                   onClick={() => navigateTo('player-detail', { playerId: scorer.playerId })}
                   className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-[#009270] cursor-pointer flex items-center justify-between gap-3 transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-sm font-black text-amber-600 w-5">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="font-mono text-sm font-black text-amber-600 w-5 shrink-0">
                       #{scorer.rank}
                     </span>
-                    <div>
-                      <div className="text-xs font-bold text-slate-900 hover:text-[#009270] transition-colors">
+                    <PlayerAvatar
+                      id={scorer.playerId}
+                      name={scorer.playerName}
+                      size="sm"
+                    />
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold text-slate-900 hover:text-[#009270] transition-colors truncate">
                         {scorer.playerName}
                       </div>
-                      <div className="text-[11px] text-slate-500">{scorer.teamName}</div>
+                      <div className="text-[11px] text-slate-500 truncate">{scorer.teamName}</div>
                     </div>
                   </div>
 
-                  <div className="text-right">
+                  <div className="text-right shrink-0">
                     <div className="font-mono text-base font-black text-[#009270]">
-                      {scorer.goals} <span className="text-[10px] text-slate-500 font-sans font-normal">goals</span>
+                      {scorer.goals} <span className="text-[10px] text-slate-500 font-sans font-normal">⚽</span>
                     </div>
                     <div className="text-[10px] text-slate-500">{scorer.assists} assists · {scorer.matches} apps</div>
                   </div>
