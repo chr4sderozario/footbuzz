@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Allow: /favicon.png
+Allow: /favicon.ico
+Allow: /sitemap.xml
+
+Sitemap: https://footbuzz.in/sitemap.xml
